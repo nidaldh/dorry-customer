@@ -1,6 +1,5 @@
 import 'package:dorry/constants.dart';
 import 'package:dorry/controller/auth_controller.dart';
-import 'package:dorry/screen/login_screen.dart';
 import 'package:dorry/screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,7 +25,11 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme(
           headlineSmall: TextStyle(
               fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-          bodySmall: TextStyle(fontSize: 16, color: Colors.white),
+          headlineMedium: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple),
+          bodySmall: TextStyle(fontSize: 16, color: Colors.deepPurple),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,

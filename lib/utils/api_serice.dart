@@ -33,8 +33,9 @@ class ApiService {
     return await _dio.post(path, data: data);
   }
 
-  Future<Response> getRequest(String path) async {
-    return await _dio.get(path);
+  Future<Response> getRequest(String path,
+      {Map<String, dynamic>? queryParameters}) async {
+    return await _dio.get(path, queryParameters: queryParameters);
   }
 
   final Dio _dio = Dio(BaseOptions(

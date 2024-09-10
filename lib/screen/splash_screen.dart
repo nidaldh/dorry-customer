@@ -1,5 +1,4 @@
 import 'package:dorry/constants.dart';
-import 'package:dorry/screen/create_store_screen.dart';
 import 'package:dorry/screen/home_screen.dart';
 import 'package:dorry/screen/login_screen.dart';
 import 'package:dorry/utils/token_manager.dart';
@@ -24,21 +23,13 @@ class _SplashScreenState extends State<SplashScreen> {
   void checkUser() async {
     final token = await TokenManager.getToken();
     if (token != null) {
-      final user = await UserManager.getUser();
+      final user = await CustomerManager.getUser();
       if (user != null) {
-        final store = await UserManager.getStore();
-        if (store != null) {
-          // Get.offAll(() => HomeScreen(type: store.storeType));
-          Get.offAll(() => HomeScreen());
-        } else {
-          Get.offAll(() => const CreateStoreScreen());
-        }
-      } else {
-        Get.offAll(() => const LoginScreen());
+        Get.offAll(() => const HomeScreen());
+        return;
       }
-    } else {
-      Get.offAll(() => const LoginScreen());
     }
+    Get.offAll(() => const LoginScreen());
   }
 
   @override

@@ -1,14 +1,14 @@
-class UserModel {
+class CustomerModel {
   final String name;
   final String mobileNumber;
 
-  UserModel({
+  CustomerModel({
     required this.name,
     required this.mobileNumber,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
+  factory CustomerModel.fromJson(Map<String, dynamic> json) {
+    return CustomerModel(
       name: json['name'],
       mobileNumber: json['mobile_number'],
     );

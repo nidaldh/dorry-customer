@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/enums/store_type.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
 import 'package:dorry/model/response/auth/success_response_model.dart';
 import 'package:dorry/model/response/response_model.dart';
-import 'package:dorry/screen/create_store_screen.dart';
 import 'package:dorry/screen/home_screen.dart';
 import 'package:dorry/screen/splash_screen.dart';
 import 'package:dorry/utils/api_serice.dart';
@@ -15,8 +15,6 @@ import 'package:get/get.dart';
 class AuthController extends GetxController {
   static AuthController instance = Get.find();
   final ApiService _apiService = ApiService();
-  String storeId = '';
-  String storeName = 'Dorry';
   late StoreType storeType;
 
   final phoneNumberController = TextEditingController();
@@ -30,12 +28,12 @@ class AuthController extends GetxController {
   }
 
   Future<BaseResponseModel?> signUpWithPhone(
-      String phoneNumber,
-      String password,
-      String name,
-      ) async {
+    String phoneNumber,
+    String password,
+    String name,
+  ) async {
     try {
-      final response = await _apiService.postRequest('/api/auth/register', {
+      final response = await _apiService.postRequest(ApiUri.register, {
         'mobile_number': phoneNumber,
         'password': password,
         'name': name,
@@ -71,7 +69,7 @@ class AuthController extends GetxController {
 
   Future<BaseResponseModel?> verifyOtp(String phoneNumber, String otp) async {
     try {
-      final response = await _apiService.postRequest('/api/auth/validate-otp', {
+      final response = await _apiService.postRequest(ApiUri.validateOtp, {
         'mobile_number': phoneNumber,
         'otp': otp,
       });
@@ -95,7 +93,7 @@ class AuthController extends GetxController {
     final password = passwordController.text;
 
     try {
-      final response = await _apiService.postRequest('/api/auth/login', {
+      final response = await _apiService.postRequest(ApiUri.login, {
         'mobile_number': phoneNumber,
         'password': password,
       });
@@ -115,29 +113,17 @@ class AuthController extends GetxController {
   }
 
   Future<void> _handleSuccessfulLogin(SuccessResponseModel response) async {
-    storeId = response.store?.id.toString() ?? '';
-    storeName = response.store?.storeName ?? 'App Title';
-
     // Save the token
     await TokenManager.saveToken(response.token);
-
-    // Save user and store data
-    await UserManager.saveUser(response.user);
-    await UserManager.saveStore(response.store);
-
-    if (response.store == null) {
-      Get.offAll(() => const CreateStoreScreen());
-    } else {
-      // Get.offAll(() => HomeScreen(type: response.store!.storeType));
-      Get.offAll(() => HomeScreen());
-    }
+    await CustomerManager.saveUser(response.customer);
+    Get.offAll(() => const HomeScreen());
   }
 
   void signOut() async {
-    final response = await _apiService.postRequest('/api/auth/logout', {});
+    final response = await _apiService.postRequest(ApiUri.logout, {});
     if (response.statusCode == 200) {
       await TokenManager.clearToken();
-      await UserManager.clear();
+      await CustomerManager.clear();
       Get.offAll(() => const SplashScreen());
     } else {
       Get.snackbar("Sign Out Failed", response.data['message']);
