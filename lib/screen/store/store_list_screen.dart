@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dorry/const/api_uri.dart';
-import 'package:dorry/utils/api_serice.dart';
+import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/model/store/store_model.dart';
-import 'package:dorry/model/store/store_details_model.dart';
 import 'package:dorry/screen/store/store_details_screen.dart';
 import 'package:get/get.dart';
 
@@ -16,6 +15,7 @@ class StoreListScreen extends StatefulWidget {
 class _StoreListScreenState extends State<StoreListScreen> {
   List<StoreModel> stores = [];
   bool isLoading = true;
+  bool hasError = false;
 
   @override
   void initState() {
@@ -24,6 +24,11 @@ class _StoreListScreenState extends State<StoreListScreen> {
   }
 
   void fetchStores() async {
+    setState(() {
+      isLoading = true;
+      hasError = false;
+    });
+
     try {
       final response = await ApiService().getRequest(ApiUri.store);
       if (response.statusCode == 200) {
@@ -34,26 +39,17 @@ class _StoreListScreenState extends State<StoreListScreen> {
           stores = storeList;
           isLoading = false;
         });
+      } else {
+        throw Exception('Failed to load stores');
       }
     } catch (e) {
       setState(() {
         isLoading = false;
+        hasError = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch stores: $e')),
+        SnackBar(content: Text('فشل في تحميل المتاجر: $e')),
       );
-    }
-  }
-
-  void fetchStoreDetails(dynamic storeId) async {
-    try {
-      final response =
-          await ApiService().getRequest('${ApiUri.store}/$storeId');
-      if (response.statusCode == 200) {
-        final storeDetails = StoreDetailsModel.fromJson(response.data);
-      }
-    } catch (e, s) {
-      ApiService().logError(e, s);
     }
   }
 
@@ -61,24 +57,79 @@ class _StoreListScreenState extends State<StoreListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stores List'),
+        title: const Text('قائمة المتاجر'),
         centerTitle: true,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: stores.length,
-              itemBuilder: (context, index) {
-                final store = stores[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(store.storeName),
-                    onTap: () =>
-                        Get.to(() => SalonDetailScreen(storeId: store.id)),
-                  ),
-                );
-              },
+          : hasError
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'فشل في تحميل المتاجر.',
+              style: TextStyle(fontSize: 18, color: Colors.red),
             ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: fetchStores,
+              child: const Text('إعادة المحاولة'),
+            ),
+          ],
+        ),
+      )
+          : stores.isEmpty
+          ? const Center(
+        child: Text(
+          'لا توجد متاجر متاحة.',
+          style: TextStyle(fontSize: 18),
+        ),
+      )
+          : ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        itemCount: stores.length,
+        itemBuilder: (context, index) {
+          final store = stores[index];
+          return Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16.0),
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.network(
+                  'https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg',
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.store, size: 50, color: Colors.grey),
+                ),
+              ),
+              title: Text(
+                store.storeName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              // subtitle: Text(
+              //   store.storeAddress ?? 'بدون عنوان',
+              //   style: const TextStyle(
+              //     fontSize: 14,
+              //     color: Colors.grey,
+              //   ),
+              // ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () =>
+                  Get.to(() => SalonDetailScreen(storeId: store.id)),
+            ),
+          );
+        },
+      ),
     );
   }
 }

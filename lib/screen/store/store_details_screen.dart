@@ -1,15 +1,15 @@
+import 'package:dorry/model/store/user_selection_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:dorry/const/api_uri.dart';
-import 'package:dorry/model/store/booking_cart.dart';
+import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/model/store/store_details_model.dart';
 import 'package:dorry/model/store/store_service_model.dart';
-import 'package:dorry/model/store/user_selection_screen.dart';
-import 'package:dorry/utils/api_serice.dart';
-import 'package:flutter/material.dart';
+import 'package:dorry/model/store/booking_cart.dart';
 
 class SalonDetailScreen extends StatefulWidget {
   final dynamic storeId;
 
-  const SalonDetailScreen({Key? key, required this.storeId}) : super(key: key);
+  const SalonDetailScreen({super.key, required this.storeId});
 
   @override
   _SalonDetailScreenState createState() => _SalonDetailScreenState();
@@ -35,13 +35,22 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
           storeDetails = StoreDetailsModel.fromJson(response.data);
           isLoading = false;
         });
+      } else {
+        _showError();
       }
     } catch (e, s) {
       ApiService().logError(e, s);
-      setState(() {
-        isLoading = false;
-      });
+      _showError();
     }
+  }
+
+  void _showError() {
+    setState(() {
+      isLoading = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('فشل في تحميل تفاصيل المتجر.')),
+    );
   }
 
   void _addToCart(StoreServiceModel service) {
@@ -65,10 +74,17 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       pinned: true,
                       flexibleSpace: FlexibleSpaceBar(
                         title: Text(storeDetails!.name),
-                        background: const Stack(
+                        background: Stack(
                           fit: StackFit.expand,
                           children: [
-                            DecoratedBox(
+                            Image.network(
+                              "https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.store,
+                                      size: 50, color: Colors.grey),
+                            ),
+                            const DecoratedBox(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [Colors.black54, Colors.transparent],
@@ -119,17 +135,25 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
 
   Widget _buildServiceItem(
       String name, String price, StoreServiceModel service) {
-    return ListTile(
-      title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(price),
-      trailing: ElevatedButton(
-        onPressed: () => _addToCart(service),
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16.0),
+        title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(price),
+        trailing: ElevatedButton(
+          onPressed: () => _addToCart(service),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
+          child: const Text('احجز'),
         ),
-        child: const Text('احجز'),
       ),
     );
   }
@@ -138,9 +162,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'ملخص الحجز',
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         Card(
@@ -188,8 +212,10 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
+          backgroundColor: Colors.blue,
         ),
-        child: const Text('احجز', style: TextStyle(fontSize: 18)),
+        child: const Text('احجز',
+            style: TextStyle(fontSize: 18, color: Colors.white)),
       ),
     );
   }

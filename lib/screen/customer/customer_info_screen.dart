@@ -12,7 +12,7 @@ class CustomerInfoScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('معلومات العميل'),
+        title: const Text('المعلومات الشخصية'),
         centerTitle: true,
       ),
       body: Padding(

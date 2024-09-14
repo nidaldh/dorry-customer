@@ -1,5 +1,5 @@
+import 'package:dorry/screen/appointments/appointment_list_screen.dart';
 import 'package:dorry/screen/customer/customer_info_screen.dart';
-import 'package:dorry/screen/reports/reports_list_screen.dart';
 import 'package:dorry/screen/store/store_list_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -17,13 +17,16 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     const CustomerInfoScreen(),
     const StoreListScreen(),
-    const ReportListScreen(),
+    const AppointmentsListScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex], // Display the selected page
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _pages[_currentIndex], // Display the selected page
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -34,17 +37,24 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Customer Info',
+            label: 'المعلومات الشخصية',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.task),
-            label: 'Store List',
+            icon: Icon(Icons.store),
+            label: 'قائمة المتاجر',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.report),
-            label: 'Report List',
+            icon: Icon(Icons.calendar_today),
+            label: 'قائمة المواعيد',
           ),
         ],
+        selectedItemColor: Colors.blue, // Highlight color for selected item
+        unselectedItemColor: Colors.grey, // Color for unselected items
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold), // Style for selected label
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal), // Style for unselected label
+        type: BottomNavigationBarType.fixed, // Type to allow text to be displayed
+        backgroundColor: Colors.white, // Background color
+        elevation: 10, // Elevation for shadow effect
       ),
     );
   }

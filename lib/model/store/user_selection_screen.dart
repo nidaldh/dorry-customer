@@ -4,17 +4,18 @@ import 'package:dorry/model/store/available_slot_blocks.dart';
 import 'package:flutter/material.dart';
 import 'package:dorry/model/store/store_user_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
-import 'package:dorry/utils/api_serice.dart';
+import 'package:dorry/utils/api_service.dart';
+import 'package:get/get.dart';
 
 class UserSelectionScreen extends StatefulWidget {
   final List<StoreUserModel> users;
   final BookingCartModel bookingCart;
 
   const UserSelectionScreen({
-    Key? key,
+    super.key,
     required this.users,
     required this.bookingCart,
-  }) : super(key: key);
+  });
 
   @override
   _UserSelectionScreenState createState() => _UserSelectionScreenState();
@@ -34,21 +35,29 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
       isLoading = true;
     });
 
-    final apiService = ApiService();
-    final response = await apiService.getRequest(
-      ApiUri.availableTimeSlots,
-      queryParameters: {
-        'duration': widget.bookingCart.totalDuration,
-      },
-    );
+    try {
+      final response = await ApiService().getRequest(
+        ApiUri.availableTimeSlots,
+        queryParameters: {
+          'duration': widget.bookingCart.totalDuration,
+        },
+      );
 
-    setState(() {
-      allTimeSlots = (response.data['availableSlotBlocks'] as List)
-          .map((json) => AvailableSlotBlock.fromJson(json))
-          .toList();
-      _filterTimeSlotsByDate(selectedDate);
-      isLoading = false;
-    });
+      setState(() {
+        allTimeSlots = (response.data['availableSlotBlocks'] as List)
+            .map((json) => AvailableSlotBlock.fromJson(json))
+            .toList();
+        _filterTimeSlotsByDate(selectedDate);
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('فشل في تحميل الفتحات المتاحة: $e')),
+      );
+    }
   }
 
   void _filterTimeSlotsByDate(DateTime date) {
@@ -130,8 +139,9 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
         final user = widget.users[index];
         return Card(
           elevation: 3,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: ListTile(
             contentPadding:
@@ -252,8 +262,9 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
           final slot = filteredTimeSlots!.first.slots[index];
           return Card(
             elevation: 3,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
             margin: const EdgeInsets.symmetric(vertical: 8),
             child: ListTile(
               title: Text('من ${slot.start} إلى ${slot.end}'),
@@ -316,11 +327,17 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
               },
               child: const Text('إلغاء'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _bookTimeSlot(slot);
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               child: const Text('تأكيد'),
             ),
           ],
@@ -353,6 +370,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('تم الحجز بنجاح')),
         );
+        Get.back();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('فشل الحجز')),

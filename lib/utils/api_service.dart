@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dorry/screen/login_screen.dart';
 import 'package:dorry/utils/token_manager.dart';
-import 'package:get/get.dart' as Navigation;
+import 'package:get/get.dart' as navigation;
 import 'package:get/get_core/src/get_main.dart';
 
 class ApiService {
@@ -70,6 +70,6 @@ class ApiService {
   void logError(dynamic message, dynamic stackTrace) {
     print('Error: $message');
     print('Stack Trace: $stackTrace');
-    Navigation.Get.snackbar('Error', message.toString());
+    navigation.Get.snackbar('Error', message.toString());
   }
 }

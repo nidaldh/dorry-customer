@@ -6,7 +6,7 @@ import 'package:dorry/model/response/auth/success_response_model.dart';
 import 'package:dorry/model/response/response_model.dart';
 import 'package:dorry/screen/home_screen.dart';
 import 'package:dorry/screen/splash_screen.dart';
-import 'package:dorry/utils/api_serice.dart';
+import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/utils/token_manager.dart';
 import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/material.dart';
