@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/screen/login_screen.dart';
 import 'package:dorry/utils/token_manager.dart';
 import 'package:get/get.dart' as navigation;
@@ -41,7 +42,7 @@ class ApiService {
   final Dio _dio = Dio(BaseOptions(
     // baseUrl: 'http://mahali.khidmatna.com',
     // baseUrl: 'http://127.0.0.1:8000',
-    baseUrl: 'http://192.168.50.169:8000',
+    baseUrl: ApiUri.baseUrl,
     connectTimeout: const Duration(seconds: 5),
     receiveTimeout: const Duration(seconds: 5),
   ));

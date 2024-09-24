@@ -2,19 +2,19 @@ import 'package:dorry/model/store/store_service_model.dart';
 import 'package:dorry/model/store/store_user_model.dart';
 
 class StoreDetailsModel {
-  final int id;
+  final dynamic id;
   final String name;
   final String storeType;
-  final String userId;
-  final List<StoreUserModel> users;
+  final dynamic partnerId;
+  final List<StorePartnerModel> partners;
   final List<StoreServiceModel> services;
 
   StoreDetailsModel({
     required this.id,
     required this.name,
     required this.storeType,
-    required this.userId,
-    required this.users,
+    required this.partnerId,
+    required this.partners,
     required this.services,
   });
 
@@ -23,9 +23,9 @@ class StoreDetailsModel {
       id: json['id'],
       name: json['store_name'],
       storeType: json['store_type'],
-      userId: json['user_id'],
-      users: (json['users'] as List)
-          .map((user) => StoreUserModel.fromJson(user))
+      partnerId: json['partner_id'],
+      partners: (json['partners'] as List)
+          .map((user) => StorePartnerModel.fromJson(user))
           .toList(),
       services: (json['services'] as List)
           .map((service) => StoreServiceModel.fromJson(service))

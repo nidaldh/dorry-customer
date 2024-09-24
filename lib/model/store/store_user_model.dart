@@ -1,17 +1,16 @@
-// lib/model/user_model.dart
-class StoreUserModel {
+class StorePartnerModel {
   final dynamic id;
   final String name;
   final String mobileNumber;
 
-  StoreUserModel({
+  StorePartnerModel({
     required this.id,
     required this.name,
     required this.mobileNumber,
   });
 
-  factory StoreUserModel.fromJson(Map<String, dynamic> json) {
-    return StoreUserModel(
+  factory StorePartnerModel.fromJson(Map<String, dynamic> json) {
+    return StorePartnerModel(
       id: json['id'],
       name: json['name'],
       mobileNumber: json['mobile_number'],

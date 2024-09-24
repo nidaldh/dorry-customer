@@ -1,7 +1,7 @@
 class AvailableSlotBlock {
   final String date;
   final String day;
-  final List<Slot> slots;
+  final List<SlotModel> slots;
 
   AvailableSlotBlock({
     required this.date,
@@ -13,8 +13,9 @@ class AvailableSlotBlock {
     return AvailableSlotBlock(
       date: json['date'],
       day: json['day'],
-      slots:
-          (json['slots'] as List).map((slot) => Slot.fromJson(slot)).toList(),
+      slots: (json['slots'] as List)
+          .map((slot) => SlotModel.fromJson(slot))
+          .toList(),
     );
   }
 
@@ -27,22 +28,28 @@ class AvailableSlotBlock {
   }
 }
 
-class Slot {
+class SlotModel {
   final dynamic timeStamp;
   final String start;
   final String end;
+  String? day;
+  final String? date;
 
-  Slot({
+  SlotModel({
     required this.timeStamp,
     required this.start,
     required this.end,
+    this.day,
+    this.date,
   });
 
-  factory Slot.fromJson(Map<String, dynamic> json) {
-    return Slot(
+  factory SlotModel.fromJson(Map<String, dynamic> json) {
+    return SlotModel(
       timeStamp: json['timeStamp'],
       start: json['start'],
       end: json['end'],
+      day: json['day'],
+      date: json['date'],
     );
   }
 
