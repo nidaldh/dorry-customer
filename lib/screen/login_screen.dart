@@ -1,5 +1,5 @@
 import 'package:dorry/controller/auth_controller.dart';
-import 'package:dorry/screen/signup_screen.dart';
+import 'package:dorry/router.dart';
 import 'package:dorry/widget/auth_scaffold.dart';
 import 'package:dorry/widget/auth_text_field.dart';
 import 'package:flutter/material.dart';
@@ -78,7 +78,7 @@ class LoginScreen extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  Get.to(() => const SignUpScreen());
+                  router.push('/sign-up');
                 },
                 child: const Text(
                   'إنشاء حساب',

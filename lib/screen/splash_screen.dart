@@ -1,10 +1,8 @@
 import 'package:dorry/constants.dart';
-import 'package:dorry/screen/home_screen.dart';
-import 'package:dorry/screen/login_screen.dart';
+import 'package:dorry/router.dart';
 import 'package:dorry/utils/token_manager.dart';
 import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,11 +23,11 @@ class _SplashScreenState extends State<SplashScreen> {
     if (token != null) {
       final user = await CustomerManager.getUser();
       if (user != null) {
-        Get.offAll(() => const HomeScreen());
+        router.replace('/home');
         return;
       }
     }
-    Get.offAll(() => const LoginScreen());
+    router.replace('/login');
   }
 
   @override

@@ -33,7 +33,7 @@ class SlotModel {
   final String start;
   final String end;
   String? day;
-  final String? date;
+  final DateTime? date;
 
   SlotModel({
     required this.timeStamp,
@@ -45,12 +45,11 @@ class SlotModel {
 
   factory SlotModel.fromJson(Map<String, dynamic> json) {
     return SlotModel(
-      timeStamp: json['timeStamp'],
-      start: json['start'],
-      end: json['end'],
-      day: json['day'],
-      date: json['date'],
-    );
+        timeStamp: json['timeStamp'],
+        start: json['start'],
+        end: json['end'],
+        day: json['day'],
+        date: DateTime.tryParse(json['date']));
   }
 
   Map<String, dynamic> toJson() {

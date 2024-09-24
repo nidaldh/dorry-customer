@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'appointment_details_screen.dart';
 
-class AppointmentsListScreen extends StatefulWidget {
-  const AppointmentsListScreen({super.key});
+class AppointmentsReportScreen extends StatefulWidget {
+  const AppointmentsReportScreen({super.key});
 
   @override
-  _AppointmentsListScreenState createState() => _AppointmentsListScreenState();
+  _AppointmentsReportScreenState createState() =>
+      _AppointmentsReportScreenState();
 }
 
-class _AppointmentsListScreenState extends State<AppointmentsListScreen> {
+class _AppointmentsReportScreenState extends State<AppointmentsReportScreen> {
   Future<List<Appointment>> futureAppointments = Future.value([]);
 
   @override
@@ -85,7 +86,8 @@ class _AppointmentsListScreenState extends State<AppointmentsListScreen> {
   }
 
   Future<List<Appointment>> fetchAppointments() async {
-    final response = await ApiService().getRequest(ApiUri.customerAppointment);
+    final response =
+        await ApiService().getRequest(ApiUri.customerAppointmentReport);
 
     if (response.statusCode == 200) {
       return AppointmentListResponseModel.fromJson(response.data).appointments;
@@ -155,7 +157,6 @@ class _AppointmentsListScreenState extends State<AppointmentsListScreen> {
   }
 
   String _formatDateTime(DateTime startTime, DateTime endTime) {
-
     return '${dayFormatter.format(startTime)}, ${dayDateFormatter.format(startTime)} - ${timeFormatter.format(startTime)} إلى ${timeFormatter.format(endTime)}';
   }
 

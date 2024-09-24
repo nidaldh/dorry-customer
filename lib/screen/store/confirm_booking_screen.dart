@@ -1,10 +1,12 @@
 import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/router.dart';
+import 'package:dorry/utils/app_snack_bar.dart';
+import 'package:dorry/utils/formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:dorry/model/store/store_user_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
 import 'package:dorry/model/store/available_slot_blocks.dart';
 import 'package:dorry/utils/api_service.dart';
-import 'package:get/get.dart';
 
 class ConfirmBookingScreen extends StatelessWidget {
   final StorePartnerModel selectedPartner;
@@ -73,10 +75,10 @@ class ConfirmBookingScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildDetailItem('الزميل', selectedPartner.name),
+            _buildDetailItem('التاريخ',
+                '${dayFormatter.format(selectedSlot.date ?? DateTime.now())} - ${dayDateFormatter.format(selectedSlot.date ?? DateTime.now())}'),
             _buildDetailItem(
-                'التاريخ', '${selectedSlot.day} - ${selectedSlot.date}'),
-            _buildDetailItem(
-                'الوقت', '${selectedSlot.start} - ${selectedSlot.end}'),
+                'الوقت', '${selectedSlot.start}  ${(selectedSlot.end)}'),
             _buildDetailItem('المبلغ الإجمالي', '₪${bookingCart.totalAmount}'),
             _buildDetailItem(
                 'المدة الإجمالية', '${bookingCart.totalDuration} دقيقة'),
@@ -201,38 +203,13 @@ class ConfirmBookingScreen extends StatelessWidget {
       Navigator.of(context).pop(); // Close the loading dialog
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'تم تأكيد الحجز بنجاح',
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Get.back();
+        successSnackBar('تم تأكيد الحجز بنجاح');
+        popUntilPath(context, '/home');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'فشل في تأكيد الحجز',
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        errorSnackBar('فشل في تأكيد الحجز');
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Close the loading dialog
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('فشل في تأكيد الحجز: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      errorSnackBar('فشل في تأكيد الحجز: $e');
     }
   }
 }

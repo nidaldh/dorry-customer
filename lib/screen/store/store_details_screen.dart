@@ -1,10 +1,11 @@
+import 'package:dorry/router.dart';
+import 'package:dorry/utils/app_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/model/store/store_details_model.dart';
 import 'package:dorry/model/store/store_service_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
-import 'package:dorry/screen/store/partner_selection_screen.dart';
 
 class SalonDetailScreen extends StatefulWidget {
   final dynamic storeId;
@@ -48,12 +49,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     setState(() {
       isLoading = false;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('فشل في تحميل تفاصيل المتجر.'),
-        backgroundColor: Colors.redAccent,
-      ),
-    );
+    errorSnackBar('فشل في تحميل تفاصيل المتجر.');
   }
 
   void _toggleCart(StoreServiceModel service) {
@@ -239,14 +235,12 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PartnerSelectionScreen(
-                partners: storeDetails!.partners,
-                bookingCart: _bookingCart,
-              ),
-            ),
+          router.push(
+            '/partner-selection',
+            extra: {
+              'partners': storeDetails!.partners,
+              'bookingCart': _bookingCart,
+            },
           );
         },
         style: ElevatedButton.styleFrom(

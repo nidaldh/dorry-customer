@@ -1,9 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:dorry/const/api_uri.dart';
-import 'package:dorry/screen/login_screen.dart';
+import 'package:dorry/router.dart';
+import 'package:dorry/utils/app_snack_bar.dart';
 import 'package:dorry/utils/token_manager.dart';
-import 'package:get/get.dart' as navigation;
-import 'package:get/get_core/src/get_main.dart';
 
 class ApiService {
   ApiService() {
@@ -23,7 +22,7 @@ class ApiService {
         if (e.response?.statusCode == 401) {
           // Handle unauthorized response
           await TokenManager.clearToken();
-          Get.offAll(() => const LoginScreen());
+          router.go('/');
         }
         return handler.next(e);
       },
@@ -71,6 +70,6 @@ class ApiService {
   void logError(dynamic message, dynamic stackTrace) {
     print('Error: $message');
     print('Stack Trace: $stackTrace');
-    navigation.Get.snackbar('Error', message.toString());
+    errorSnackBar(message.toString());
   }
 }

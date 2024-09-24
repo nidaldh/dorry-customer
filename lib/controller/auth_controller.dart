@@ -4,9 +4,9 @@ import 'package:dorry/enums/store_type.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
 import 'package:dorry/model/response/auth/success_response_model.dart';
 import 'package:dorry/model/response/response_model.dart';
-import 'package:dorry/screen/home_screen.dart';
-import 'package:dorry/screen/splash_screen.dart';
+import 'package:dorry/router.dart';
 import 'package:dorry/utils/api_service.dart';
+import 'package:dorry/utils/app_snack_bar.dart';
 import 'package:dorry/utils/token_manager.dart';
 import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +47,7 @@ class AuthController extends GetxController {
       if (e is DioException) {
         return AuthFailedResponseModel.fromJson(e.response!.data);
       }
-      Get.snackbar("Sign Up Failed", e.toString());
+      errorSnackBar("Sign Up Failed$e");
       return null;
     }
   }
@@ -60,10 +60,10 @@ class AuthController extends GetxController {
       if (response.statusCode == 200) {
         // Handle successful OTP send
       } else {
-        Get.snackbar("Send OTP Failed", response.data['message']);
+        errorSnackBar("Send OTP Failed ${response.data['message']}");
       }
     } catch (e) {
-      Get.snackbar("Send OTP Failed", e.toString());
+      errorSnackBar("Send OTP Failed $e");
     }
   }
 
@@ -77,13 +77,13 @@ class AuthController extends GetxController {
         final successResponse = SuccessResponseModel.fromJson(response.data);
         await _handleSuccessfulLogin(successResponse);
       } else {
-        Get.snackbar("OTP Verification Failed", response.data['message']);
+        errorSnackBar("OTP Verification Failed ${response.data['message']}");
       }
     } catch (e) {
       if (e is DioException) {
         return BaseResponseModel.fromJson(e.response!.data);
       }
-      Get.snackbar("OTP Verification Failed", e.toString());
+      errorSnackBar("OTP Verification Failed $e");
     }
     return null;
   }
@@ -101,13 +101,13 @@ class AuthController extends GetxController {
         final successResponse = SuccessResponseModel.fromJson(response.data);
         await _handleSuccessfulLogin(successResponse);
       } else {
-        Get.snackbar("Login Failed", response.data['message']);
+        errorSnackBar("Login Failed ${response.data['message']}");
       }
     } catch (e) {
       if (e is DioException) {
-        Get.snackbar("Login Failed", e.response!.data['message']);
+        errorSnackBar("Login Failed ${e.response!.data['message']}");
       } else {
-        Get.snackbar("Login Failed", e.toString());
+        errorSnackBar("Login Failed $e");
       }
     }
   }
@@ -116,7 +116,7 @@ class AuthController extends GetxController {
     // Save the token
     await TokenManager.saveToken(response.token);
     await CustomerManager.saveUser(response.customer);
-    Get.offAll(() => const HomeScreen());
+    router.replace('/home');
   }
 
   void signOut() async {
@@ -124,9 +124,9 @@ class AuthController extends GetxController {
     if (response.statusCode == 200) {
       await TokenManager.clearToken();
       await CustomerManager.clear();
-      Get.offAll(() => const SplashScreen());
+      router.replace('/');
     } else {
-      Get.snackbar("Sign Out Failed", response.data['message']);
+      errorSnackBar("Sign Out Failed ${response.data['message']}");
     }
   }
 

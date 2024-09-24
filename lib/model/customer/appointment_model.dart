@@ -1,11 +1,10 @@
-
 class Appointment {
   final int id;
   final DateTime startTime;
   final DateTime endTime;
   final double totalPrice;
   final String status;
-  final String user;
+  final String partner;
   final List<AppointmentService> services;
 
   Appointment({
@@ -14,7 +13,7 @@ class Appointment {
     required this.endTime,
     required this.totalPrice,
     required this.status,
-    required this.user,
+    required this.partner,
     required this.services,
   });
 
@@ -25,7 +24,7 @@ class Appointment {
       endTime: DateTime.parse(json['end_time']),
       totalPrice: json['total_price'].toDouble(),
       status: json['status'],
-      user: json['user'],
+      partner: json['partner'],
       services: (json['services'] as List)
           .map((service) => AppointmentService.fromJson(service))
           .toList(),

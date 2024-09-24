@@ -1,6 +1,8 @@
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/model/store/available_slot_blocks.dart';
-import 'package:dorry/screen/store/confirm_booking_screen.dart';
+import 'package:dorry/router.dart';
+import 'package:dorry/utils/app_snack_bar.dart';
+import 'package:dorry/utils/formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:dorry/model/store/store_user_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
@@ -54,9 +56,7 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل في تحميل الفتحات المتاحة: $e')),
-      );
+      errorSnackBar('فشل في تحميل الوقت المتاح: $e');
     }
   }
 
@@ -202,7 +202,7 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
             ),
             const SizedBox(height: 5),
             Text(
-              day,
+              dayFormatter.format(date),
               style: TextStyle(
                 color: isSelected ? Colors.black : Colors.grey,
               ),
@@ -221,7 +221,7 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
     if (filteredTimeSlots == null || filteredTimeSlots!.isEmpty) {
       return const Center(
         child: Text(
-          'لم يتم العثور على فتحات متاحة.',
+          'لم يتم العثور على وقت متاحة.',
           style: TextStyle(fontSize: 16, color: Colors.redAccent),
         ),
       );
@@ -242,15 +242,11 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
                 style: const TextStyle(fontSize: 16)),
             trailing: const Icon(Icons.arrow_forward_ios, size: 18),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ConfirmBookingScreen(
-                      selectedPartner: selectedPartner!,
-                      selectedSlot: slot,
-                      bookingCart: widget.bookingCart),
-                ),
-              );
+              router.replace('/confirm-booking', extra: {
+                'selectedPartner': selectedPartner,
+                'selectedSlot': slot,
+                'bookingCart': widget.bookingCart,
+              });
             },
             tileColor: Colors.purple.shade50,
             shape: RoundedRectangleBorder(

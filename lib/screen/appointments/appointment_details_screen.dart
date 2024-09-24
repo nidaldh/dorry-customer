@@ -1,28 +1,37 @@
 import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/router.dart';
+import 'package:dorry/utils/app_snack_bar.dart';
+import 'package:dorry/utils/formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:dorry/model/customer/appointment_model.dart';
 import 'package:dorry/utils/api_service.dart';
 import 'package:intl/intl.dart';
 
 class AppointmentDetailsScreen extends StatelessWidget {
-  final Appointment appointment;
+  final dynamic appointmentId;
 
-  const AppointmentDetailsScreen({super.key, required this.appointment});
+  const AppointmentDetailsScreen({super.key, required this.appointmentId});
 
   Future<void> cancelAppointment(BuildContext context) async {
-    final response = await ApiService().postRequest(
-        '${ApiUri.customerAppointment}/${appointment.id}/cancel', {});
+    final response = await ApiService()
+        .postRequest('${ApiUri.customerAppointment}/$appointmentId/cancel', {});
 
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم إلغاء الموعد بنجاح')),
-      );
-      Navigator.pop(
-          context, true); // Return to the previous screen with a success result
+      successSnackBar('تم إلغاء الموعد بنجاح');
+      router.pop(true);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('فشل في إلغاء الموعد')),
-      );
+      errorSnackBar('فشل في إلغاء الموعد');
+    }
+  }
+
+  Future<Appointment> fetchAppointmentDetails() async {
+    final response = await ApiService()
+        .getRequest('${ApiUri.customerAppointment}/$appointmentId');
+
+    if (response.statusCode == 200) {
+      return Appointment.fromJson(response.data['appointment']);
+    } else {
+      throw Exception('Failed to load appointment details');
     }
   }
 
@@ -60,43 +69,65 @@ class AppointmentDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('تفاصيل الموعد'),
         centerTitle: true,
-        actions: [
-          if (appointment.status != 'cancelled')
-            IconButton(
-              icon: const Icon(Icons.cancel),
-              onPressed: () => showCancelConfirmationDialog(context),
-            ),
-        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildAppointmentHeader(),
-            const SizedBox(height: 20),
-            _buildAppointmentDetails(),
-            const SizedBox(height: 20),
-            const Text(
-              'الخدمات:',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+      body: FutureBuilder<Appointment>(
+        future: fetchAppointmentDetails(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            print(snapshot.stackTrace);
+            return Center(child: Text('خطأ: ${snapshot.error}'));
+          } else if (!snapshot.hasData) {
+            return const Center(child: Text('لا توجد تفاصيل للموعد.'));
+          } else {
+            final appointment = snapshot.data!;
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAppointmentHeader(appointment),
+                  const SizedBox(height: 20),
+                  _buildAppointmentDetails(appointment),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'الخدمات:',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: _buildServicesList(appointment),
+                  ),
+                  if (appointment.status == 'booked')
+                    ElevatedButton(
+                      onPressed: () {
+                        showCancelConfirmationDialog(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('إلغاء الموعد'),
+                    ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: _buildServicesList(),
-            ),
-          ],
-        ),
+            );
+          }
+        },
       ),
     );
   }
 
-  Widget _buildAppointmentHeader() {
+  Widget _buildAppointmentHeader(Appointment appointment) {
     return Text(
-      'موعد مع ${appointment.user}',
+      'موعد مع ${appointment.partner}',
       style: const TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
@@ -104,7 +135,7 @@ class AppointmentDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppointmentDetails() {
+  Widget _buildAppointmentDetails(Appointment appointment) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -119,7 +150,7 @@ class AppointmentDetailsScreen extends StatelessWidget {
               icon: Icons.calendar_today,
               label: 'التاريخ',
               value:
-              _formatDateTime(appointment.startTime, appointment.endTime),
+                  _formatDateTime(appointment.startTime, appointment.endTime),
             ),
             const Divider(),
             _buildDetailRow(
@@ -169,7 +200,7 @@ class AppointmentDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesList() {
+  Widget _buildServicesList(Appointment appointment) {
     return ListView.builder(
       itemCount: appointment.services.length,
       itemBuilder: (context, index) {
@@ -198,10 +229,6 @@ class AppointmentDetailsScreen extends StatelessWidget {
   }
 
   String _formatDateTime(DateTime startTime, DateTime endTime) {
-    final DateFormat dayFormatter = DateFormat('EEEE', 'ar');
-    final DateFormat dayDateFormatter = DateFormat('yyyy-MM-dd');
-    final DateFormat timeFormatter = DateFormat('HH:mm');
-
     return '${dayFormatter.format(startTime)}, ${dayDateFormatter.format(startTime)} - ${timeFormatter.format(startTime)} إلى ${timeFormatter.format(endTime)}';
   }
 
