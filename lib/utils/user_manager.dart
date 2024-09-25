@@ -9,9 +9,10 @@ class CustomerManager {
   static StoreModel? store;
   static CustomerModel? user;
 
-  static Future<void> saveUser(CustomerModel user) async {
+  static Future<void> saveUser(CustomerModel newUser) async {
+    user = newUser;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_customerKey, jsonEncode(user.toJson()));
+    await prefs.setString(_customerKey, jsonEncode(newUser.toJson()));
   }
 
   static Future<CustomerModel?> getUser() async {

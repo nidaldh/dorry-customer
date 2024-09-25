@@ -5,9 +5,7 @@ import 'package:dorry/router.dart';
 import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/utils/formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'appointment_details_screen.dart';
 
 class AppointmentsListScreen extends StatefulWidget {
   const AppointmentsListScreen({super.key});
@@ -129,34 +127,30 @@ class _AppointmentsListScreenState extends State<AppointmentsListScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        Row(
-          children: [
-            const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
-            const SizedBox(width: 8),
-            Text(
-              _formatDateTime(appointment.startTime, appointment.endTime),
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
+        Text(
+          '${dayFormatter.format(appointment.startTime)}, ${dayDateFormatter.format(appointment.startTime)}',
+          style: const TextStyle(fontSize: 16),
+          overflow: TextOverflow.ellipsis, // To handle long text gracefully
+        ),
+        Text(
+          ' ${timeFormatter.format(appointment.startTime)} إلى ${timeFormatter.format(appointment.endTime)}',
+          style: const TextStyle(fontSize: 16),
+          overflow: TextOverflow.ellipsis, // To handle long text gracefully
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            const Icon(Icons.attach_money, size: 20, color: Colors.grey),
-            const SizedBox(width: 8),
-            Text(
-              'السعر الإجمالي: ₪${appointment.totalPrice}',
-              style: const TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                ' ₪${appointment.totalPrice}',
+                style: const TextStyle(fontSize: 16),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
       ],
     );
-  }
-
-  String _formatDateTime(DateTime startTime, DateTime endTime) {
-
-    return '${dayFormatter.format(startTime)}, ${dayDateFormatter.format(startTime)} - ${timeFormatter.format(startTime)} إلى ${timeFormatter.format(endTime)}';
   }
 
   String _getStatusText(String status) {
