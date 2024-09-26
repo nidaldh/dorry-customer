@@ -47,7 +47,7 @@ class _StoreListScreenState extends State<StoreListScreen> {
         isLoading = false;
         hasError = true;
       });
-      errorSnackBar('فشل في تحميل المتاجر: $e');
+      errorSnackBar('فشل في تحميل الصالونات: $e');
     }
   }
 
@@ -55,7 +55,7 @@ class _StoreListScreenState extends State<StoreListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('قائمة المتاجر'),
+        title: const Text('قائمة الصالونات'),
         centerTitle: true,
       ),
       body: isLoading
@@ -66,7 +66,7 @@ class _StoreListScreenState extends State<StoreListScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'فشل في تحميل المتاجر.',
+                        'فشل في تحميل الصالونات.',
                         style: TextStyle(fontSize: 18, color: Colors.red),
                       ),
                       const SizedBox(height: 16),
@@ -80,7 +80,7 @@ class _StoreListScreenState extends State<StoreListScreen> {
               : stores.isEmpty
                   ? const Center(
                       child: Text(
-                        'لا توجد متاجر متاحة.',
+                        'لا توجد صالونات متاحة.',
                         style: TextStyle(fontSize: 18),
                       ),
                     )

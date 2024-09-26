@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/enums/store_type.dart';
+import 'package:dorry/model/gender_model.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
 import 'package:dorry/model/response/auth/success_response_model.dart';
 import 'package:dorry/model/response/response_model.dart';
@@ -14,8 +15,9 @@ import 'package:get/get.dart';
 
 class AuthController extends GetxController {
   static AuthController instance = Get.find();
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService = ApiService(isAuth: true);
   late StoreType storeType;
+  String countryCode = '970';
 
   final phoneNumberController = TextEditingController();
   final passwordController = TextEditingController();
@@ -24,19 +26,18 @@ class AuthController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    // Add any initialization logic here
   }
 
   Future<BaseResponseModel?> signUpWithPhone(
-    String phoneNumber,
-    String password,
     String name,
+    GenderModel gender,
   ) async {
     try {
       final response = await _apiService.postRequest(ApiUri.register, {
-        'mobile_number': phoneNumber,
-        'password': password,
+        'mobile_number': phoneNumberController.text,
+        'password': passwordController.text,
         'name': name,
+        'gender': gender.code.name
       });
       if (response.statusCode == 200) {
         return null;
@@ -48,7 +49,16 @@ class AuthController extends GetxController {
         return AuthFailedResponseModel.fromJson(e.response!.data);
       }
       errorSnackBar("Sign Up Failed$e");
-      return null;
+      return AuthFailedResponseModel(
+        success: false,
+        message: e.toString(),
+        data: Data(
+          name: '',
+          mobileNumber: null,
+          password: '',
+          otp: '',
+        ),
+      );
     }
   }
 
@@ -67,10 +77,10 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<BaseResponseModel?> verifyOtp(String phoneNumber, String otp) async {
+  Future<BaseResponseModel?> verifyOtp(String otp) async {
     try {
       final response = await _apiService.postRequest(ApiUri.validateOtp, {
-        'mobile_number': phoneNumber,
+        'mobile_number': phoneNumberController.text,
         'otp': otp,
       });
       if (response.statusCode == 200) {
@@ -88,11 +98,11 @@ class AuthController extends GetxController {
     return null;
   }
 
-  Future<void> loginWithPhone() async {
-    final phoneNumber = phoneNumberController.text;
+  Future<BaseResponseModel?> loginWithPhone() async {
+    String phoneNumber = phoneNumberController.text;
     final password = passwordController.text;
-
     try {
+      phoneNumber = '$countryCode$phoneNumber';
       final response = await _apiService.postRequest(ApiUri.login, {
         'mobile_number': phoneNumber,
         'password': password,
@@ -101,15 +111,15 @@ class AuthController extends GetxController {
         final successResponse = SuccessResponseModel.fromJson(response.data);
         await _handleSuccessfulLogin(successResponse);
       } else {
-        errorSnackBar("Login Failed ${response.data['message']}");
+        return AuthFailedResponseModel.fromJson(response.data);
       }
-    } catch (e) {
+    } catch (e, s) {
       if (e is DioException) {
-        errorSnackBar("Login Failed ${e.response!.data['message']}");
-      } else {
-        errorSnackBar("Login Failed $e");
+        return AuthFailedResponseModel.fromJson(e.response?.data);
       }
+      _apiService.logError(e, s);
     }
+    return null;
   }
 
   Future<void> _handleSuccessfulLogin(SuccessResponseModel response) async {
@@ -128,6 +138,28 @@ class AuthController extends GetxController {
     } else {
       errorSnackBar("Sign Out Failed ${response.data['message']}");
     }
+  }
+
+  Future<AuthFailedResponseModel?> requestResetPassword() async {
+    String phoneNumber = phoneNumberController.text;
+    phoneNumber = '$countryCode$phoneNumber';
+    try {
+      final response = await _apiService
+          .postRequest('/api/customer/password/request-reset', {
+        'mobile_number': phoneNumber,
+      });
+      if (response.statusCode == 200) {
+        successSnackBar("تم رمز إعادة تعيين كلمة المرور إلى الوتساب.");
+      } else {
+        errorSnackBar("Failed ${response.data['message']}");
+      }
+    } catch (e, s) {
+      if (e is DioException) {
+        _apiService.logError(e, s);
+        return AuthFailedResponseModel.fromJson(e.response?.data);
+      }
+    }
+    return null;
   }
 
   void togglePasswordVisibility() {

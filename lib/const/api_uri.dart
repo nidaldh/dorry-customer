@@ -7,6 +7,7 @@ class ApiUri {
   static const login = '/api/customer/login';
   static const validateOtp = '/api/customer/validate-otp';
   static const logout = '/api/customer/logout';
+  static const validateResetPasswordOtp = '/api/customer/password/validate-otp';
   static const customerAppointment= '/api/customer/appointments';
   static const customerAppointmentReport= '/api/customer/appointments/report';
   static const store = '/api/store';

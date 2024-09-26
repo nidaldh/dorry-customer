@@ -1,8 +1,9 @@
 import 'package:dorry/main.dart';
 import 'package:dorry/screen/appointments/appointment_details_screen.dart';
+import 'package:dorry/screen/auth/forget_password_screen.dart';
 import 'package:dorry/screen/home_screen.dart';
-import 'package:dorry/screen/login_screen.dart';
-import 'package:dorry/screen/signup_screen.dart';
+import 'package:dorry/screen/auth/login_screen.dart';
+import 'package:dorry/screen/auth/signup_screen.dart';
 import 'package:dorry/screen/splash_screen.dart';
 import 'package:dorry/screen/store/confirm_booking_screen.dart';
 import 'package:dorry/screen/store/partner_selection_screen.dart';
@@ -24,6 +25,13 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         appContext = context;
         return const SignUpScreen();
+      },
+    ),
+    GoRoute(
+      path: '/forget-password',
+      builder: (context, state) {
+        appContext = context;
+        return const ForgetPasswordScreen();
       },
     ),
     GoRoute(

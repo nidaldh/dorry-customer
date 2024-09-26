@@ -13,7 +13,7 @@ class AuthFailedResponseModel extends BaseResponseModel {
     return AuthFailedResponseModel(
       success: json['success'],
       message: json['message'],
-      data: Data.fromJson(json['errors']),
+      data: Data.fromJson(json['errors'] ?? {}),
     );
   }
 

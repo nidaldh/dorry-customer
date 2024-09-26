@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.store),
-            label: 'قائمة المتاجر',
+            label: 'قائمة الصالونات',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),

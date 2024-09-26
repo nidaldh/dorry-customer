@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:dorry/const/api_uri.dart';
-import 'package:dorry/router.dart';
-import 'package:dorry/utils/app_snack_bar.dart';
 import 'package:dorry/utils/token_manager.dart';
+import 'package:flutter/material.dart';
+import 'package:dorry/main.dart';
+import 'package:dorry/router.dart';
 
 class ApiService {
-  ApiService() {
+  ApiService({bool isAuth = false}) {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await TokenManager.getToken();
@@ -19,10 +20,19 @@ class ApiService {
         return handler.next(response);
       },
       onError: (DioException e, handler) async {
-        if (e.response?.statusCode == 401) {
-          // Handle unauthorized response
+        if (e.response?.statusCode == 401 && !isAuth) {
           await TokenManager.clearToken();
           router.go('/');
+          return;
+        }
+        if (e.response?.statusCode == 500) {
+          ScaffoldMessenger.of(appContext!).showSnackBar(
+            SnackBar(
+              content: Text(e.response?.data['message'] ?? 'خطأ غير معروف'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
         }
         return handler.next(e);
       },
@@ -33,14 +43,16 @@ class ApiService {
     return await _dio.post(path, data: data);
   }
 
+  Future<Response> patchRequest(String path, Map<String, dynamic> data) async {
+    return await _dio.patch(path, data: data);
+  }
+
   Future<Response> getRequest(String path,
       {Map<String, dynamic>? queryParameters}) async {
     return await _dio.get(path, queryParameters: queryParameters);
   }
 
   final Dio _dio = Dio(BaseOptions(
-    // baseUrl: 'http://mahali.khidmatna.com',
-    // baseUrl: 'http://127.0.0.1:8000',
     baseUrl: ApiUri.baseUrl,
     connectTimeout: const Duration(seconds: 5),
     receiveTimeout: const Duration(seconds: 5),
@@ -70,6 +82,6 @@ class ApiService {
   void logError(dynamic message, dynamic stackTrace) {
     print('Error: $message');
     print('Stack Trace: $stackTrace');
-    errorSnackBar(message.toString());
+    // navigation.Get.snackbar('Error', message.toString());
   }
 }
