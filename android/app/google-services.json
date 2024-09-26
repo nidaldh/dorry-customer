@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "329427137452",
+    "project_id": "dorry-ad149",
+    "storage_bucket": "dorry-ad149.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329427137452:android:0e01948e14c8bb139f0009",
+        "android_client_info": {
+          "package_name": "ps.nidaldh.dorry"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaLd3i09UShHYdEpselTlF8DryzsbEb6s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
