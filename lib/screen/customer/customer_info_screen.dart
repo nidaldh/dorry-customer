@@ -1,7 +1,8 @@
-import 'package:dorry/controller/auth_controller.dart';
-import 'package:dorry/utils/user_manager.dart';
+import 'package:dorry/web_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dorry/controller/auth_controller.dart';
+import 'package:dorry/utils/user_manager.dart';
 
 class CustomerInfoScreen extends StatelessWidget {
   const CustomerInfoScreen({super.key});
@@ -14,6 +15,34 @@ class CustomerInfoScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('المعلومات الشخصية'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final shouldLogout = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('تسجيل الخروج'),
+                  content: const Text('هل أنت متأكد أنك تريد تسجيل الخروج؟'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('إلغاء'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('تسجيل الخروج'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (shouldLogout == true) {
+                Get.find<AuthController>().signOut();
+              }
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -56,41 +85,34 @@ class CustomerInfoScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  final shouldLogout = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('تسجيل الخروج'),
-                      content:
-                          const Text('هل أنت متأكد أنك تريد تسجيل الخروج؟'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('إلغاء'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('تسجيل الخروج'),
-                        ),
-                      ],
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WebViewScreen(
+                      url: 'https://dorry.khidmatna.com/privacy-policy',
+                      title: 'سياسة الخصوصية',
                     ),
-                  );
-
-                  if (shouldLogout == true) {
-                    Get.find<AuthController>().signOut();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                child: const Text('تسجيل الخروج'),
-              ),
+                );
+              },
+              child: const Text('سياسة الخصوصية'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WebViewScreen(
+                      url: 'https://dorry.khidmatna.com/terms-and-conditions',
+                      title: 'الشروط والأحكام',
+                    ),
+                  ),
+                );
+              },
+              child: const Text('الشروط والأحكام'),
             ),
           ],
         ),

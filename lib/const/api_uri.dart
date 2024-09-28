@@ -1,5 +1,5 @@
 class ApiUri {
-  // static const baseUrl = 'http://mahali.khidmatna.com';
+  // static const baseUrl = 'https://dorry.khidmatna.com';
   static const baseUrl = 'http://192.168.50.169:8000';
   // static const baseUrl = 'http://192.168.0.105:8000';
   // static const baseUrl = 'http://192.168.1.18:8000';

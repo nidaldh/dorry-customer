@@ -33,8 +33,10 @@ class AuthController extends GetxController {
     GenderModel gender,
   ) async {
     try {
+      String phoneNumber = phoneNumberController.text;
+      phoneNumber = '$countryCode$phoneNumber';
       final response = await _apiService.postRequest(ApiUri.register, {
-        'mobile_number': phoneNumberController.text,
+        'mobile_number': phoneNumber,
         'password': passwordController.text,
         'name': name,
         'gender': gender.code.name
@@ -62,8 +64,10 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> _sendOtp(String phoneNumber) async {
+  Future<void> _sendOtp() async {
     try {
+      String phoneNumber = phoneNumberController.text;
+      phoneNumber = '$countryCode$phoneNumber';
       final response = await _apiService.postRequest('/send-otp', {
         'mobile_number': phoneNumber,
       });
@@ -79,8 +83,10 @@ class AuthController extends GetxController {
 
   Future<BaseResponseModel?> verifyOtp(String otp) async {
     try {
+      String phoneNumber = phoneNumberController.text;
+      phoneNumber = '$countryCode$phoneNumber';
       final response = await _apiService.postRequest(ApiUri.validateOtp, {
-        'mobile_number': phoneNumberController.text,
+        'mobile_number': phoneNumber,
         'otp': otp,
       });
       if (response.statusCode == 200) {
@@ -99,9 +105,9 @@ class AuthController extends GetxController {
   }
 
   Future<BaseResponseModel?> loginWithPhone() async {
-    String phoneNumber = phoneNumberController.text;
     final password = passwordController.text;
     try {
+      String phoneNumber = phoneNumberController.text;
       phoneNumber = '$countryCode$phoneNumber';
       final response = await _apiService.postRequest(ApiUri.login, {
         'mobile_number': phoneNumber,

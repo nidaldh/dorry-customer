@@ -74,6 +74,7 @@ class _CustomPhoneNumberFieldState extends State<CustomPhoneNumberField> {
                   onChanged: (String? newValue) {
                     widget.changeCountryCode(newValue!);
                     widget.authController.countryCode = newValue;
+                    setState(() {});
                   },
                 ),
               ),
