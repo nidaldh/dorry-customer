@@ -114,6 +114,38 @@ class CustomerInfoScreen extends StatelessWidget {
               },
               child: const Text('الشروط والأحكام'),
             ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () async {
+                final shouldDelete = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('حذف الحساب'),
+                    content: const Text(
+                        'سيتم حذف معلومات الحساب بعد ١٤ يوم من الان، في حال قررت التراجع عن هذا القرار يمكن تسجيل الدخول قبل انقضاء المدة'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('إلغاء'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('lموافق'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (shouldDelete == true) {
+                  // Implement account deletion logic here
+                  Get.find<AuthController>().signOut();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Text('حذف الحساب'),
+            ),
           ],
         ),
       ),

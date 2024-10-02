@@ -4,23 +4,39 @@ class AuthFailedResponseModel extends BaseResponseModel {
   final Data data;
 
   AuthFailedResponseModel({
-    required super.success,
-    required super.message,
+    super.success,
+    super.message,
+    super.status,
     required this.data,
   });
 
-  factory AuthFailedResponseModel.fromJson(Map<String, dynamic> json) {
+  factory AuthFailedResponseModel.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return AuthFailedResponseModel(
+        success: false,
+        message: json?['message'] ?? 'Something went wrong',
+        data: Data(
+          name: '',
+          mobileNumber: json?['message'] ?? 'Something went wrong',
+          password: '',
+          otp: '',
+        ),
+      );
+    }
     return AuthFailedResponseModel(
       success: json['success'],
       message: json['message'],
+      status: json['status'],
       data: Data.fromJson(json['errors'] ?? {}),
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'success': success,
       'message': message,
+      'status': status,
       'data': data.toJson(),
     };
   }

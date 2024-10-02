@@ -1,6 +1,7 @@
 import 'package:dorry/app_theme.dart';
 import 'package:dorry/controller/auth_controller.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
+import 'package:dorry/router.dart';
 import 'package:dorry/widget/auth_scaffold.dart';
 import 'package:dorry/widget/auth_text_field.dart';
 import 'package:dorry/widget/phone_number_field.dart';
@@ -17,14 +18,27 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final AuthController authController = Get.find<AuthController>();
-  final formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>(); // Key for form validation
   Map<String, String?> errors = {};
+  bool isLoading = false; // Add this line
 
   void login() async {
     if (formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true; // Show the progress indicator
+      });
+
       final response = await authController.loginWithPhone();
 
+      setState(() {
+        isLoading = false; // Hide the progress indicator
+      });
+
       if (response is AuthFailedResponseModel) {
+        if (response.status == 'otp_required') {
+          router.push('/verify-otp');
+          return;
+        }
         setState(() {
           errors = {
             'mobileNumber': response.data.mobileNumber,
@@ -115,12 +129,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
+                // Login Button with loading indicator
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      login();
-                    },
+                    onPressed: isLoading ? null : login,
+                    // Disable button when loading
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: kPrimaryColor,
@@ -129,13 +143,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ), // Button text color
                     ),
-                    child: const Text(
-                      'تسجيل الدخول',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                        : const Text(
+                            'تسجيل الدخول',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 24),

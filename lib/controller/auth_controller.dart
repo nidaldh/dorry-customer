@@ -23,11 +23,6 @@ class AuthController extends GetxController {
   final passwordController = TextEditingController();
   var isPasswordVisible = false.obs;
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
   Future<BaseResponseModel?> signUpWithPhone(
     String name,
     GenderModel gender,
@@ -132,7 +127,7 @@ class AuthController extends GetxController {
     // Save the token
     await TokenManager.saveToken(response.token);
     await CustomerManager.saveUser(response.customer);
-    router.replace('/home');
+    router.go('/home');
   }
 
   void signOut() async {
@@ -140,7 +135,7 @@ class AuthController extends GetxController {
     if (response.statusCode == 200) {
       await TokenManager.clearToken();
       await CustomerManager.clear();
-      router.replace('/');
+      router.go('/');
     } else {
       errorSnackBar("Sign Out Failed ${response.data['message']}");
     }

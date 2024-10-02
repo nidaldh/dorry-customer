@@ -1,6 +1,7 @@
 import 'package:dorry/main.dart';
 import 'package:dorry/screen/appointments/appointment_details_screen.dart';
 import 'package:dorry/screen/auth/forget_password_screen.dart';
+import 'package:dorry/screen/auth/verify_otp_screen.dart';
 import 'package:dorry/screen/home_screen.dart';
 import 'package:dorry/screen/auth/login_screen.dart';
 import 'package:dorry/screen/auth/signup_screen.dart';
@@ -14,42 +15,50 @@ import 'package:go_router/go_router.dart';
 final GoRouter router = GoRouter(
   routes: [
     GoRoute(
-      path: '/',
+      path: splashPath,
       builder: (context, state) {
         appContext = context;
         return const SplashScreen();
       },
     ),
     GoRoute(
-      path: '/sign-up',
+      path: signUpPath,
       builder: (context, state) {
         appContext = context;
         return const SignUpScreen();
       },
     ),
+    //verify-otp
     GoRoute(
-      path: '/forget-password',
+      path: '/verify-otp',
+      builder: (context, state) {
+        appContext = context;
+        return const VerifyOtpScreen();
+      },
+    ),
+    GoRoute(
+      path: forgetPasswordPath,
       builder: (context, state) {
         appContext = context;
         return const ForgetPasswordScreen();
       },
     ),
     GoRoute(
-      path: '/login',
+      path: loginPath,
       builder: (context, state) {
         appContext = context;
         return const LoginScreen();
       },
     ),
     GoRoute(
-      path: '/home',
+      path: homePath,
       builder: (context, state) {
         appContext = context;
         return const HomeScreen();
       },
     ),
     GoRoute(
-      path: '/store/:storeId',
+      path: storePath,
       builder: (context, state) {
         appContext = context;
         final dynamic storeId = state.pathParameters['storeId'];
@@ -57,7 +66,7 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/confirm-booking',
+      path: confirmBookingPath,
       builder: (context, state) {
         appContext = context;
         final extra = state.extra as Map<String, dynamic>;
@@ -72,7 +81,7 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/partner-selection',
+      path: partnerSelectionPath,
       builder: (context, state) {
         appContext = context;
         final extra = state.extra as Map<String, dynamic>;
@@ -85,7 +94,7 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/appointment/:id',
+      path: appointmentPath,
       builder: (context, state) {
         appContext = context;
         return AppointmentDetailsScreen(
@@ -105,3 +114,13 @@ void popUntilPath(BuildContext context, String routePath) {
     router.pop();
   }
 }
+
+const String splashPath = '/';
+const String signUpPath = '/sign-up';
+const String forgetPasswordPath = '/forget-password';
+const String loginPath = '/login';
+const String homePath = '/home';
+const String storePath = '/store/:storeId';
+const String confirmBookingPath = '/confirm-booking';
+const String partnerSelectionPath = '/partner-selection';
+const String appointmentPath = '/appointment/:id';

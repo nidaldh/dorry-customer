@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'dorry-ad149.appspot.com',
     iosBundleId: 'ps.nidaldh.dorry',
   );
+
 }

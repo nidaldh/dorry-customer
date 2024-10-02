@@ -1,17 +1,19 @@
-
 class BaseResponseModel {
   final bool? success;
   final String? message;
+  final String? status;
 
   BaseResponseModel({
-    required this.success,
-    required this.message,
+    this.success,
+    this.message,
+    this.status,
   });
 
   factory BaseResponseModel.fromJson(Map<String, dynamic> json) {
     return BaseResponseModel(
       success: json['success'],
       message: json['message'],
+      status: json['status'],
     );
   }
 
@@ -19,6 +21,7 @@ class BaseResponseModel {
     return {
       'success': success,
       'message': message,
+      'status': status,
     };
   }
 }
