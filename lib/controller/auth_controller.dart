@@ -8,7 +8,6 @@ import 'package:dorry/model/response/response_model.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/utils/app_snack_bar.dart';
-import 'package:dorry/utils/token_manager.dart';
 import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -125,15 +124,13 @@ class AuthController extends GetxController {
 
   Future<void> _handleSuccessfulLogin(SuccessResponseModel response) async {
     // Save the token
-    await TokenManager.saveToken(response.token);
-    await CustomerManager.saveUser(response.customer);
+    await CustomerManager.saveUser(response.customer, response.token);
     router.go('/home');
   }
 
   void signOut() async {
     final response = await _apiService.postRequest(ApiUri.logout, {});
     if (response.statusCode == 200) {
-      await TokenManager.clearToken();
       await CustomerManager.clear();
       router.go('/');
     } else {

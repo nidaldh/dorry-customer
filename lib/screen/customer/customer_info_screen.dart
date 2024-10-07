@@ -1,15 +1,21 @@
+import 'package:dorry/model/customer_model.dart';
 import 'package:dorry/web_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dorry/controller/auth_controller.dart';
 import 'package:dorry/utils/user_manager.dart';
 
-class CustomerInfoScreen extends StatelessWidget {
+class CustomerInfoScreen extends StatefulWidget {
   const CustomerInfoScreen({super.key});
 
   @override
+  _CustomerInfoScreenState createState() => _CustomerInfoScreenState();
+}
+
+class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
+  @override
   Widget build(BuildContext context) {
-    final customer = CustomerManager.user;
+    final CustomerModel customer = CustomerManager.user!;
 
     return Scaffold(
       appBar: AppBar(
@@ -130,7 +136,7 @@ class CustomerInfoScreen extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('lموافق'),
+                        child: const Text('موافق'),
                       ),
                     ],
                   ),

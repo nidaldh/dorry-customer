@@ -6,11 +6,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerManager {
   static const String _customerKey = 'customer';
+  static const String _tokenKey = 'auth_token';
   static StoreModel? store;
   static CustomerModel? user;
+  static String? token;
 
-  static Future<void> saveUser(CustomerModel newUser) async {
+  static Future<void> saveUser(
+      CustomerModel newUser, String currentToken) async {
     user = newUser;
+    _saveToken(currentToken);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_customerKey, jsonEncode(newUser.toJson()));
   }
@@ -18,6 +22,7 @@ class CustomerManager {
   static Future<CustomerModel?> getUser() async {
     final prefs = await SharedPreferences.getInstance();
     final userData = prefs.getString(_customerKey);
+    getToken();
     if (userData != null) {
       user = CustomerModel.fromJson(jsonDecode(userData));
       return user;
@@ -27,6 +32,25 @@ class CustomerManager {
 
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
+    _clearToken();
     await prefs.remove(_customerKey);
+  }
+
+  static Future<void> _saveToken(String currentToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    token = currentToken;
+    await prefs.setString(_tokenKey, currentToken);
+  }
+
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString(_tokenKey);
+    return token;
+  }
+
+  static Future<void> _clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    token = null;
   }
 }

@@ -1,11 +1,9 @@
 import 'package:dorry/const/api_uri.dart';
-import 'package:dorry/main.dart';
+import 'package:dorry/model/response/auth/success_response_model.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/api_service.dart';
-import 'package:dorry/utils/token_manager.dart';
 import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,18 +17,12 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     checkUser();
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (message.notification != null) {
-        _showNotificationDialog(message.notification!);
-      }
-    });
   }
 
   void checkUser() async {
-    final token = await TokenManager.getToken();
-    if (token != null) {
+    final token = await CustomerManager.getToken();
+    if (token != null && await _customerInfo()) {
       final user = await CustomerManager.getUser();
-      await _requestPermission();
 
       if (user != null) {
         router.replace('/home');
@@ -40,24 +32,18 @@ class _SplashScreenState extends State<SplashScreen> {
     router.replace('/login');
   }
 
-  void _showNotificationDialog(RemoteNotification notification) {
-    showDialog(
-      context: appContext!,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(notification.title ?? 'Notification'),
-          content: Text(notification.body ?? 'You have a new message.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  Future<bool> _customerInfo() async {
+    try {
+      final response = await ApiService(isAuth: true).getRequest(ApiUri.info);
+      if (response.statusCode == 200) {
+        final data = SuccessResponseModel.fromJson(response.data);
+        await CustomerManager.saveUser(data.customer, data.token);
+        return true;
+      }
+    } catch (e) {
+      CustomerManager.clear();
+    }
+    return false;
   }
 
   @override
@@ -79,32 +65,5 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ),
     );
-  }
-
-  Future _requestPermission() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-        settings.authorizationStatus == AuthorizationStatus.provisional) {
-      await _getToken();
-    } else {
-      print('User declined or has not accepted permission');
-    }
-  }
-
-  Future _getToken() async {
-    String? token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
-      ApiService().postRequest(ApiUri.fcmToken, {'token': token});
-    }
   }
 }

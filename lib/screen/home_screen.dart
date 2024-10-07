@@ -1,6 +1,13 @@
+import 'dart:io';
+
+import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/main.dart';
 import 'package:dorry/screen/appointments/appointment_list_screen.dart';
 import 'package:dorry/screen/customer/customer_info_screen.dart';
 import 'package:dorry/screen/store/store_list_screen.dart';
+import 'package:dorry/utils/api_service.dart';
+import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,6 +19,92 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _requestPermission();
+  }
+
+  void showNotificationDialog(RemoteNotification notification) {
+    showDialog(
+      context: appContext!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(notification.title ?? 'Notification'),
+          content: Text(notification.body ?? 'You have a new message.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future _requestPermission() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: true,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+      await _getToken();
+      FirebaseMessaging.instance.subscribeToTopic('all');
+      FirebaseInAppMessaging.instance.setMessagesSuppressed(false);
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        if (message.notification != null) {
+          showNotificationDialog(message.notification!);
+        }
+      });
+    } else {
+      print('User declined or has not accepted permission');
+    }
+  }
+
+  Future _getToken() async {
+    final _firebaseMessaging = FirebaseMessaging.instance;
+    if (Platform.isIOS) {
+      String? apnsToken = await _firebaseMessaging.getAPNSToken();
+      if (apnsToken != null) {
+        await _firebaseMessaging.subscribeToTopic('all');
+      } else {
+        await Future<void>.delayed(
+          const Duration(
+            seconds: 3,
+          ),
+        );
+        apnsToken = await _firebaseMessaging.getAPNSToken();
+        if (apnsToken != null) {
+          await _firebaseMessaging.subscribeToTopic('all');
+        }
+      }
+    } else {
+      await _firebaseMessaging.subscribeToTopic('all');
+    }
+    // String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+// print('APNS Token: $apnsToken');
+    // String? token = await FirebaseMessaging.instance.getToken();
+    //   print('FCM Token: $token');
+
+    // print('APNS Token: $apnsToken');
+    // if (token != null) {
+    //   ApiService().postRequest(ApiUri.fcmToken, {'token': token});
+    //   print('Token: $token');
+    // }
+  }
 
   // List of pages corresponding to each tab
   final List<Widget> _pages = [
@@ -48,12 +141,18 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'قائمة المواعيد',
           ),
         ],
-        selectedItemColor: Colors.blue, // Highlight color for selected item
-        unselectedItemColor: Colors.grey, // Color for unselected items
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold), // Style for selected label
-        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal), // Style for unselected label
-        type: BottomNavigationBarType.fixed, // Type to allow text to be displayed
-        backgroundColor: Colors.white, // Background color
+        selectedItemColor: Colors.blue,
+        // Highlight color for selected item
+        unselectedItemColor: Colors.grey,
+        // Color for unselected items
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+        // Style for selected label
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
+        // Style for unselected label
+        type: BottomNavigationBarType.fixed,
+        // Type to allow text to be displayed
+        backgroundColor: Colors.white,
+        // Background color
         elevation: 10, // Elevation for shadow effect
       ),
     );

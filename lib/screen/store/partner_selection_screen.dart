@@ -1,3 +1,4 @@
+import 'package:dorry/app_theme.dart';
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/model/store/available_slot_blocks.dart';
 import 'package:dorry/router.dart';
@@ -84,12 +85,12 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
           contentPadding:
               const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
           leading: CircleAvatar(
-            backgroundColor: Colors.green,
+            backgroundColor: kSecondaryColor,
             child: Text(selectedPartner!.name[0]),
           ),
           title: Text(selectedPartner!.name,
               style: const TextStyle(fontWeight: FontWeight.bold)),
-          trailing: const Icon(Icons.check_circle, color: Colors.green),
+          trailing: const Icon(Icons.check_circle, color: kSecondaryColor),
           onTap: () {
             setState(() {
               selectedPartner = null;
@@ -183,10 +184,10 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: isSelected ? Colors.purple : Colors.white,
+                color: isSelected ? kPrimaryColor : Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? Colors.purple : Colors.grey,
+                  color: isSelected ? kPrimaryColor : Colors.grey,
                   width: 2,
                 ),
               ),
@@ -231,8 +232,8 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
         separatorBuilder: (context, index) => Divider(
-          thickness: 2,
-          color: Colors.purple.shade200,
+          thickness: 1,
+          // color: Colors.purple.shade200,
         ),
         itemCount: filteredTimeSlots!.first.slots.length,
         itemBuilder: (context, index) {
@@ -248,7 +249,7 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
                 'bookingCart': widget.bookingCart,
               });
             },
-            tileColor: Colors.purple.shade50,
+            tileColor: kPrimaryColor.withOpacity(0.3),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

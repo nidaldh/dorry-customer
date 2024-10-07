@@ -5,7 +5,6 @@ import 'package:dorry/utils/formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:dorry/model/customer/appointment_model.dart';
 import 'package:dorry/utils/api_service.dart';
-import 'package:intl/intl.dart';
 
 class AppointmentDetailsScreen extends StatelessWidget {
   final dynamic appointmentId;

@@ -5,9 +5,7 @@ import 'package:dorry/router.dart';
 import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/utils/formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'appointment_details_screen.dart';
 
 class AppointmentsReportScreen extends StatefulWidget {
   const AppointmentsReportScreen({super.key});

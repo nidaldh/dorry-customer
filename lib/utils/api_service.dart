@@ -1,15 +1,16 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:dorry/const/api_uri.dart';
-import 'package:dorry/utils/token_manager.dart';
-import 'package:flutter/material.dart';
-import 'package:dorry/main.dart';
+import 'package:dorry/utils/app_snack_bar.dart';
+import 'package:dorry/utils/user_manager.dart';
 import 'package:dorry/router.dart';
 
 class ApiService {
   ApiService({bool isAuth = false}) {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await TokenManager.getToken();
+        final token = CustomerManager.token;
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
@@ -21,17 +22,12 @@ class ApiService {
       },
       onError: (DioException e, handler) async {
         if (e.response?.statusCode == 401 && !isAuth) {
-          await TokenManager.clearToken();
-          router.go('/');
+          await CustomerManager.clear();
+          router.go('/login');
           return;
         }
         if (e.response?.statusCode == 500) {
-          ScaffoldMessenger.of(appContext!).showSnackBar(
-            SnackBar(
-              content: Text(e.response?.data['message'] ?? 'خطأ غير معروف'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          errorSnackBar(e.response?.data['message'] ?? 'خطأ غير معروف');
           return;
         }
         return handler.next(e);
@@ -79,9 +75,25 @@ class ApiService {
   }
 
   //log error
-  void logError(dynamic message, dynamic stackTrace) {
+  void logError(dynamic message, dynamic stackTrace) async {
     print('Error: $message');
     print('Stack Trace: $stackTrace');
     // navigation.Get.snackbar('Error', message.toString());
+  }
+
+  Future<Response> uploadImage(String path, File image) async {
+    try {
+      final formData = FormData.fromMap({
+        'profile_image': await MultipartFile.fromFile(
+          image.path,
+          filename: 'profile_image.jpg',
+        ),
+      });
+
+      return await _dio.post(path, data: formData);
+    } catch (e) {
+      print('Error uploading image: $e');
+      throw e;
+    }
   }
 }
