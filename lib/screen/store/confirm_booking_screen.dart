@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/app_snack_bar.dart';
@@ -209,7 +210,12 @@ class ConfirmBookingScreen extends StatelessWidget {
         errorSnackBar('فشل في تأكيد الحجز');
       }
     } catch (e) {
-      errorSnackBar('فشل في تأكيد الحجز: $e');
+      if(e is DioException){
+        errorSnackBar('فشل في تأكيد الحجز: ${e.response?.data['message']}');
+      } else {
+        errorSnackBar('فشل في تأكيد الحجز: $e');
+      }
+      Navigator.of(context).pop(); // Close the loading dialog
     }
   }
 }

@@ -14,6 +14,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 void main() async {
+  //only portrait mode
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -44,8 +45,8 @@ class MyApp extends StatelessWidget {
       options: const ScreenUtilOptions(
         enable: true,
         designSize: Size(360, 690),
-        fontFactorByWidth: 2.0,
-        fontFactorByHeight: 1.0,
+        // fontFactorByWidth: 2.0,
+        // fontFactorByHeight: 1.0,
         flipSizeWhenLandscape: true,
       ),
       child: MaterialApp.router(

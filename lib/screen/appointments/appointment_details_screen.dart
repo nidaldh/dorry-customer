@@ -75,7 +75,6 @@ class AppointmentDetailsScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            print(snapshot.stackTrace);
             return Center(child: Text('خطأ: ${snapshot.error}'));
           } else if (!snapshot.hasData) {
             return const Center(child: Text('لا توجد تفاصيل للموعد.'));

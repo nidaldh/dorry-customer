@@ -6,6 +6,7 @@ import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/model/store/store_details_model.dart';
 import 'package:dorry/model/store/store_service_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
+import 'package:dorry/utils/sizes.dart';
 
 class SalonDetailScreen extends StatefulWidget {
   final dynamic storeId;
@@ -66,14 +67,16 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: isLoading
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('جارٍ تحميل تفاصيل المتجر...',
-                      style: TextStyle(fontSize: 16)),
+                  const CircularProgressIndicator(),
+                  SizedBox(height: Sizes.height_16),
+                  Text(
+                    'جارٍ تحميل تفاصيل المتجر...',
+                    style: TextStyle(fontSize: Sizes.textSize_16),
+                  ),
                 ],
               ),
             )
@@ -85,21 +88,18 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       child: CustomScrollView(
                         slivers: [
                           SliverAppBar(
-                            expandedHeight: 250.0,
+                            expandedHeight: Sizes.height_200,
                             pinned: true,
                             flexibleSpace: FlexibleSpaceBar(
                               title: Text(
                                 storeDetails!.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      blurRadius: 10.0,
-                                      color: Colors.black,
-                                      offset: Offset(0, 2),
-                                    ),
-                                  ],
+                                style: TextStyle(
+                                  // color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Sizes.textSize_16,
                                 ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               background: Hero(
                                 tag: 'storeImage-${widget.storeId}',
@@ -107,13 +107,13 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                                   fit: StackFit.expand,
                                   children: [
                                     Image.network(
-                                      "https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg",
+                                      storeDetails!.image ??
+                                          "https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg",
                                       fit: BoxFit.cover,
                                       errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              const Icon(
+                                          (context, error, stackTrace) => Icon(
                                         Icons.store,
-                                        size: 50,
+                                        size: Sizes.iconSize_50,
                                         color: Colors.grey,
                                       ),
                                     ),
@@ -136,12 +136,30 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                           ),
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding: EdgeInsets.all(Sizes.paddingAll_16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  if (storeDetails!.address != null ||
+                                      storeDetails!.area != null) ...[
+                                    Row(
+                                      children: [
+                                        Icon(Icons.location_on,
+                                            color: Colors.grey),
+                                        SizedBox(width: Sizes.width_8),
+                                        Expanded(
+                                          child: Text(
+                                            "${storeDetails!.area ?? ''}, ${storeDetails!.address ?? ''}",
+                                            style: TextStyle(
+                                                fontSize: Sizes.textSize_16,
+                                                color: Colors.black87),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                   _buildServicesSection(),
-                                  const SizedBox(height: 30),
+                                  SizedBox(height: Sizes.height_30),
                                 ],
                               ),
                             ),
@@ -152,17 +170,18 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     _buildBookButton(),
                   ],
                 )
-              : const Center(
+              : Center(
                   child: Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(Sizes.paddingAll_16),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.error, size: 80, color: Colors.red),
-                        SizedBox(height: 16),
+                        Icon(Icons.error,
+                            size: Sizes.iconSize_60, color: Colors.red),
+                        SizedBox(height: Sizes.height_16),
                         Text(
                           'فشل في تحميل تفاصيل المتجر.',
-                          style: TextStyle(fontSize: 18),
+                          style: TextStyle(fontSize: Sizes.textSize_18),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -191,14 +210,14 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
       String name, String price, StoreServiceModel service) {
     final isSelected = _bookingCart.selectedServices.contains(service);
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: isSelected ? 8 : 4,
+      margin: EdgeInsets.symmetric(vertical: Sizes.vertical_5),
+      elevation: isSelected ? Sizes.elevation_8 : Sizes.elevation_4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(Sizes.radius_15),
       ),
       color: isSelected ? Colors.blue[50] : Colors.white,
       child: ListTile(
-        contentPadding: const EdgeInsets.all(16.0),
+        contentPadding: EdgeInsets.all(Sizes.paddingAll_16),
         leading: Icon(
           isSelected ? Icons.check_circle : Icons.circle,
           color: isSelected ? Colors.green : Colors.grey,
@@ -207,13 +226,13 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
           name,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: Sizes.textSize_16,
             color: isSelected ? Colors.blueAccent : Colors.black,
           ),
         ),
         subtitle: Text(
           price,
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: Sizes.textSize_14),
         ),
         trailing: IconButton(
           icon: Icon(
@@ -244,17 +263,17 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
           );
         },
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: Sizes.vertical_15),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(Sizes.radius_30),
           ),
           backgroundColor: Colors.blueAccent,
           shadowColor: Colors.blueAccent.withOpacity(0.5),
-          elevation: 10,
+          elevation: Sizes.elevation_8,
         ),
-        child: const Text(
+        child: Text(
           'اختر الزميل',
-          style: TextStyle(fontSize: 18, color: Colors.white),
+          style: TextStyle(fontSize: Sizes.textSize_18, color: Colors.white),
         ),
       ),
     );
@@ -266,13 +285,13 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 22,
+          style: TextStyle(
+            fontSize: Sizes.textSize_22,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: Sizes.height_8),
         child,
       ],
     );

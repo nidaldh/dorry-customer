@@ -4,6 +4,7 @@ class StoreModel {
   final String? area;
   final dynamic areaId;
   final String? address;
+  final String? image;
 
   StoreModel({
     required this.id,
@@ -11,6 +12,7 @@ class StoreModel {
     this.areaId,
     this.area,
     this.address,
+    this.image,
   });
 
   factory StoreModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class StoreModel {
       area: json['area'],
       areaId: json['area_id'],
       address: json['address'],
+      image: json['image'],
     );
   }
 }

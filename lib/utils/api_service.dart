@@ -27,8 +27,7 @@ class ApiService {
           return;
         }
         if (e.response?.statusCode == 500) {
-          errorSnackBar(e.response?.data['message'] ?? 'خطأ غير معروف');
-          return;
+          errorSnackBar(e.response?.data['message']  ?? e.response?.data['error'] ?? 'خطأ غير معروف');
         }
         return handler.next(e);
       },

@@ -6,7 +6,7 @@ import 'package:dorry/screen/appointments/appointment_list_screen.dart';
 import 'package:dorry/screen/customer/customer_info_screen.dart';
 import 'package:dorry/screen/store/store_list_screen.dart';
 import 'package:dorry/utils/api_service.dart';
-import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
+// import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
@@ -18,11 +18,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
+  int _currentIndex = 1;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _requestPermission();
   }
@@ -63,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
         settings.authorizationStatus == AuthorizationStatus.provisional) {
       await _getToken();
       FirebaseMessaging.instance.subscribeToTopic('all');
-      FirebaseInAppMessaging.instance.setMessagesSuppressed(false);
+      // FirebaseInAppMessaging.instance.setMessagesSuppressed(false);
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         if (message.notification != null) {
           showNotificationDialog(message.notification!);
@@ -94,16 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       await _firebaseMessaging.subscribeToTopic('all');
     }
-    // String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-// print('APNS Token: $apnsToken');
-    // String? token = await FirebaseMessaging.instance.getToken();
-    //   print('FCM Token: $token');
-
-    // print('APNS Token: $apnsToken');
-    // if (token != null) {
-    //   ApiService().postRequest(ApiUri.fcmToken, {'token': token});
-    //   print('Token: $token');
-    // }
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (token != null) {
+      ApiService().postRequest(ApiUri.fcmToken, {'token': token});
+    }
   }
 
   // List of pages corresponding to each tab
@@ -116,9 +109,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _pages[_currentIndex], // Display the selected page
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -142,18 +135,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         selectedItemColor: Colors.blue,
-        // Highlight color for selected item
         unselectedItemColor: Colors.grey,
-        // Color for unselected items
         selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
-        // Style for selected label
         unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
-        // Style for unselected label
         type: BottomNavigationBarType.fixed,
-        // Type to allow text to be displayed
         backgroundColor: Colors.white,
-        // Background color
-        elevation: 10, // Elevation for shadow effect
+        elevation: 10,
       ),
     );
   }
