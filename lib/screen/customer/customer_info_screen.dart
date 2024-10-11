@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dorry/main.dart';
 import 'package:dorry/model/customer_model.dart';
 import 'package:dorry/web_view_screen.dart';
 import 'package:flutter/material.dart';
@@ -124,7 +125,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
             ),
             const SizedBox(height: 12),
             //if iphone.
-            if (Platform.isIOS)
+            if (Platform.isIOS && showDeleteButton)
               ElevatedButton(
                 onPressed: () async {
                   final shouldDelete = await showDialog<bool>(

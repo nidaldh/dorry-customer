@@ -11,7 +11,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'firebase_options.dart';
+
+///todo remove form here
+BuildContext? appContext;
+late PackageInfo packageInfo;
+bool showDeleteButton = false;
 
 void main() async {
   //only portrait mode
@@ -19,7 +25,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  await fetchBuildNumber();
   if (kReleaseMode) {
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
@@ -34,7 +40,9 @@ void main() async {
   runApp(const MyApp());
 }
 
-BuildContext? appContext;
+Future<void> fetchBuildNumber() async {
+  packageInfo = await PackageInfo.fromPlatform();
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

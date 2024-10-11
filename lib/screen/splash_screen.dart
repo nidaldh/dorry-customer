@@ -1,8 +1,10 @@
 import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/main.dart';
 import 'package:dorry/model/response/auth/success_response_model.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/utils/user_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -20,16 +22,44 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void checkUser() async {
-    final token = await CustomerManager.getToken();
-    if (token != null && await _customerInfo()) {
-      final user = await CustomerManager.getUser();
-
-      if (user != null) {
-        router.replace('/home');
+    try {
+      if (await _checkForUpdate()) {
+        router.replace(needUpdatePath);
         return;
       }
+      final token = await CustomerManager.getToken();
+      if (token != null && await _customerInfo()) {
+        final user = await CustomerManager.getUser();
+
+        if (user != null) {
+          router.replace('/home');
+          return;
+        }
+      }
+    } catch (e) {
+      if(kDebugMode) print(e);
+      CustomerManager.clear();
     }
     router.replace('/login');
+  }
+
+  Future<bool> _checkForUpdate() async {
+    try {
+      print('remo');
+      final response =
+          await ApiService(isAuth: true).getRequest(ApiUri.checkForUpdate);
+      print('asdasdasd');
+      print(response.data);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        showDeleteButton = data['showDeleteButton'] ?? false;
+        return data['needsUpdate'] ?? false;
+      }
+    } catch (e) {
+      if(kDebugMode) print(e);
+      showDeleteButton = false;
+    }
+    return false;
   }
 
   Future<bool> _customerInfo() async {

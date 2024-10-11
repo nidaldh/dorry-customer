@@ -2,6 +2,7 @@ import 'package:dorry/main.dart';
 import 'package:dorry/screen/appointments/appointment_details_screen.dart';
 import 'package:dorry/screen/auth/forget_password_screen.dart';
 import 'package:dorry/screen/auth/verify_otp_screen.dart';
+import 'package:dorry/screen/developer/developer_info_screen.dart';
 import 'package:dorry/screen/home_screen.dart';
 import 'package:dorry/screen/auth/login_screen.dart';
 import 'package:dorry/screen/auth/signup_screen.dart';
@@ -9,6 +10,7 @@ import 'package:dorry/screen/splash_screen.dart';
 import 'package:dorry/screen/store/confirm_booking_screen.dart';
 import 'package:dorry/screen/store/partner_selection_screen.dart';
 import 'package:dorry/screen/store/store_details_screen.dart';
+import 'package:dorry/screen/update_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -101,6 +103,21 @@ final GoRouter router = GoRouter(
             appointmentId: state.pathParameters['id']);
       },
     ),
+    GoRoute(
+      path: developerInfoPath,
+      builder: (context, state) {
+        appContext = context;
+        return const DeveloperInfoScreen();
+      },
+    ),
+    //needUpdatePath
+    GoRoute(
+      path: needUpdatePath,
+      builder: (context, state) {
+        appContext = context;
+        return const UpdateScreen();
+      },
+    ),
   ],
 );
 
@@ -124,3 +141,5 @@ const String storePath = '/store/:storeId';
 const String confirmBookingPath = '/confirm-booking';
 const String partnerSelectionPath = '/partner-selection';
 const String appointmentPath = '/appointment/:id';
+const String developerInfoPath = '/developer-info';
+const String needUpdatePath = '/update';

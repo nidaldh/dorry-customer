@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/main.dart';
 import 'package:dorry/utils/app_snack_bar.dart';
 import 'package:dorry/utils/user_manager.dart';
 import 'package:dorry/router.dart';
@@ -14,6 +15,9 @@ class ApiService {
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
+        options.headers['appVersion'] = packageInfo.version;
+        options.headers['appBuildNumber'] = packageInfo.buildNumber;
+        options.headers['platform'] = Platform.isAndroid ? 'android' : 'ios';
         options.headers['Accept'] = 'application/json';
         return handler.next(options);
       },
