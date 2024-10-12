@@ -33,6 +33,16 @@ class _AppointmentsListScreenState extends State<AppointmentsListScreen> {
       appBar: AppBar(
         title: const Text('قائمة المواعيد'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                futureAppointments = fetchAppointments();
+              });
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<Appointment>>(
         future: futureAppointments,
@@ -48,7 +58,7 @@ class _AppointmentsListScreenState extends State<AppointmentsListScreen> {
             return ListView.builder(
               itemCount: appointments.length,
               padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               itemBuilder: (context, index) {
                 final appointment = appointments[index];
                 return GestureDetector(

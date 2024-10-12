@@ -93,10 +93,18 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                             flexibleSpace: FlexibleSpaceBar(
                               title: Text(
                                 storeDetails!.name,
+                                //add stroke to text
                                 style: TextStyle(
-                                  // color: Colors.white,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: Sizes.textSize_16,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 5,
+                                      color: Colors.black,
+                                      offset: Offset(1.0, 1.0),
+                                    ),
+                                  ],
                                 ),
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
