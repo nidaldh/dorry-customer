@@ -1,10 +1,10 @@
-import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/controller/common_controller.dart';
 import 'package:dorry/model/customer/appointment_model.dart';
-import 'package:dorry/model/response/customer/appointment_list_response_model.dart';
 import 'package:dorry/router.dart';
-import 'package:dorry/utils/api_service.dart';
 import 'package:dorry/utils/formatter.dart';
+import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 class AppointmentsListScreen extends StatefulWidget {
@@ -15,91 +15,76 @@ class AppointmentsListScreen extends StatefulWidget {
 }
 
 class _AppointmentsListScreenState extends State<AppointmentsListScreen> {
-  Future<List<Appointment>> futureAppointments = Future.value([]);
+  final CommonController commonController = Get.find<CommonController>();
 
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('ar', null).then((_) {
-      setState(() {
-        futureAppointments = fetchAppointments();
-      });
+      commonController.fetchAppointments();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('قائمة المواعيد'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                futureAppointments = fetchAppointments();
-              });
-            },
+    return GetBuilder<CommonController>(
+      id: 'appointment_list',
+      builder: (controller) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('قائمة المواعيد'),
+            centerTitle: true,
+            actions: CustomerManager.user != null
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: () {
+                        commonController.fetchAppointments();
+                      },
+                    ),
+                  ]
+                : [],
           ),
-        ],
-      ),
-      body: FutureBuilder<List<Appointment>>(
-        future: futureAppointments,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('خطأ: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('لا توجد مواعيد.'));
-          } else {
-            final appointments = snapshot.data!;
-            return ListView.builder(
-              itemCount: appointments.length,
-              padding:
-              const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              itemBuilder: (context, index) {
-                final appointment = appointments[index];
-                return GestureDetector(
-                  onTap: () {
-                    router.push('/appointment/${appointment.id}');
-                  },
-                  child: Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildAppointmentHeader(appointment),
-                          const Divider(),
-                          _buildAppointmentDetails(appointment),
-                        ],
+          body: controller.futureAppointments.isEmpty
+              ? Center(
+                  child: Text(CustomerManager.user != null
+                      ? 'لا توجد مواعيد.'
+                      : 'الرجاء تسجيل الدخول لعرض المواعيد.'),
+                )
+              : ListView.builder(
+                  itemCount: controller.futureAppointments.length,
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 16.0),
+                  itemBuilder: (context, index) {
+                    final appointment = controller.futureAppointments[index];
+                    return GestureDetector(
+                      onTap: () {
+                        router.push('/appointment/${appointment.id}');
+                      },
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildAppointmentHeader(appointment),
+                              const Divider(),
+                              _buildAppointmentDetails(appointment),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-        },
-      ),
+                    );
+                  },
+                ),
+        );
+      },
     );
-  }
-
-  Future<List<Appointment>> fetchAppointments() async {
-    final response = await ApiService().getRequest(ApiUri.customerAppointment);
-
-    if (response.statusCode == 200) {
-      return AppointmentListResponseModel.fromJson(response.data).appointments;
-    } else {
-      throw Exception('فشل في تحميل المواعيد');
-    }
   }
 
   Widget _buildAppointmentHeader(Appointment appointment) {

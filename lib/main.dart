@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:dorry/app_theme.dart';
 import 'package:dorry/constants.dart';
 import 'package:dorry/controller/auth_controller.dart';
+import 'package:dorry/controller/common_controller.dart';
 import 'package:dorry/router.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -37,6 +38,7 @@ void main() async {
   }
 
   Get.put(AuthController());
+  Get.put(CommonController());
   runApp(const MyApp());
 }
 

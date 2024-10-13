@@ -132,6 +132,10 @@ void popUntilPath(BuildContext context, String routePath) {
   }
 }
 
+//redirect path variable
+String? redirectPath;
+Object? redirectExtra;
+
 const String splashPath = '/';
 const String signUpPath = '/sign-up';
 const String forgetPasswordPath = '/forget-password';

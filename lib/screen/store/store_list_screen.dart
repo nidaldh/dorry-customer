@@ -38,7 +38,10 @@ class _StoreListScreenState extends State<StoreListScreen> {
     });
 
     try {
-      final response = await ApiService().getRequest(ApiUri.store);
+      final response =
+          await ApiService().getRequest(ApiUri.store, queryParameters: {
+        "gender": "male",
+      });
       if (response.statusCode == 200) {
         var storeList = (response.data['stores'] as List)
             .map((store) => StoreModel.fromJson(store))

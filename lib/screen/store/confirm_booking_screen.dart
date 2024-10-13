@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/controller/common_controller.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/app_snack_bar.dart';
 import 'package:dorry/utils/formatter.dart';
@@ -8,6 +9,7 @@ import 'package:dorry/model/store/store_user_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
 import 'package:dorry/model/store/available_slot_blocks.dart';
 import 'package:dorry/utils/api_service.dart';
+import 'package:get/get.dart';
 
 class ConfirmBookingScreen extends StatelessWidget {
   final StorePartnerModel selectedPartner;
@@ -205,6 +207,7 @@ class ConfirmBookingScreen extends StatelessWidget {
 
       if (response.statusCode == 200) {
         successSnackBar('تم تأكيد الحجز بنجاح');
+        Get.find<CommonController>().fetchAppointments();
         popUntilPath(context, '/home');
       } else {
         errorSnackBar('فشل في تأكيد الحجز');

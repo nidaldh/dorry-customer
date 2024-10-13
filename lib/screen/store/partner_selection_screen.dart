@@ -4,6 +4,7 @@ import 'package:dorry/model/store/available_slot_blocks.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/app_snack_bar.dart';
 import 'package:dorry/utils/formatter.dart';
+import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:dorry/model/store/store_user_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
@@ -242,7 +243,18 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
             title: Text('من ${slot.start} إلى ${slot.end}',
                 style: const TextStyle(fontSize: 16)),
             trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-            onTap: () {
+            onTap: () async {
+              final customer = CustomerManager.user;
+              if (customer == null) {
+                redirectPath = '/confirm-booking';
+                redirectExtra = {
+                  'selectedPartner': selectedPartner,
+                  'selectedSlot': slot,
+                  'bookingCart': widget.bookingCart,
+                };
+                router.replace('/login');
+                return;
+              }
               router.replace('/confirm-booking', extra: {
                 'selectedPartner': selectedPartner,
                 'selectedSlot': slot,

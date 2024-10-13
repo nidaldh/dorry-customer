@@ -6,6 +6,7 @@ import 'package:dorry/screen/appointments/appointment_list_screen.dart';
 import 'package:dorry/screen/customer/customer_info_screen.dart';
 import 'package:dorry/screen/store/store_list_screen.dart';
 import 'package:dorry/utils/api_service.dart';
+import 'package:dorry/utils/user_manager.dart';
 // import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await _firebaseMessaging.subscribeToTopic('all');
     }
     String? token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
+    if (token != null && CustomerManager.token != null) {
       ApiService().postRequest(ApiUri.fcmToken, {'token': token});
     }
   }

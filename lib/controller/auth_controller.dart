@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/controller/common_controller.dart';
 import 'package:dorry/enums/store_type.dart';
 import 'package:dorry/model/gender_model.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
@@ -123,15 +124,20 @@ class AuthController extends GetxController {
   }
 
   Future<void> _handleSuccessfulLogin(SuccessResponseModel response) async {
-    // Save the token
     await CustomerManager.saveUser(response.customer, response.token);
-    router.go('/home');
+    Get.find<CommonController>().update(['customer_info','appointment_list']);
+    if (redirectPath != null) {
+      router.replace(redirectPath!, extra: redirectExtra);
+    } else {
+      router.go('/home');
+    }
   }
 
   void signOut() async {
     final response = await _apiService.postRequest(ApiUri.logout, {});
     if (response.statusCode == 200) {
       await CustomerManager.clear();
+      Get.find<CommonController>().update(['customer_info','appointment_list']);
       router.go('/');
     } else {
       errorSnackBar("Sign Out Failed ${response.data['message']}");

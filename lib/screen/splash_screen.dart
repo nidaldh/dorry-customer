@@ -29,34 +29,28 @@ class _SplashScreenState extends State<SplashScreen> {
       }
       final token = await CustomerManager.getToken();
       if (token != null && await _customerInfo()) {
-        final user = await CustomerManager.getUser();
-
-        if (user != null) {
-          router.replace('/home');
-          return;
-        }
+        await CustomerManager.getUser();
+        router.replace('/home');
+        return;
       }
     } catch (e) {
-      if(kDebugMode) print(e);
+      if (kDebugMode) print(e);
       CustomerManager.clear();
     }
-    router.replace('/login');
+    router.replace('/home');
   }
 
   Future<bool> _checkForUpdate() async {
     try {
-      print('remo');
       final response =
           await ApiService(isAuth: true).getRequest(ApiUri.checkForUpdate);
-      print('asdasdasd');
-      print(response.data);
       if (response.statusCode == 200) {
         final data = response.data;
         showDeleteButton = data['showDeleteButton'] ?? false;
         return data['needsUpdate'] ?? false;
       }
     } catch (e) {
-      if(kDebugMode) print(e);
+      if (kDebugMode) print(e);
       showDeleteButton = false;
     }
     return false;

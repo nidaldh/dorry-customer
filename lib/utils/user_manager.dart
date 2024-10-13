@@ -33,6 +33,7 @@ class CustomerManager {
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     _clearToken();
+    user = null;
     await prefs.remove(_customerKey);
   }
 

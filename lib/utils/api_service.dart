@@ -25,7 +25,7 @@ class ApiService {
         return handler.next(response);
       },
       onError: (DioException e, handler) async {
-        if (e.response?.statusCode == 401 && !isAuth) {
+        if (e.response?.statusCode == 401 && !isAuth && CustomerManager.token != null) {
           await CustomerManager.clear();
           router.go('/login');
           return;
