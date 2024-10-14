@@ -125,7 +125,7 @@ class AuthController extends GetxController {
 
   Future<void> _handleSuccessfulLogin(SuccessResponseModel response) async {
     await CustomerManager.saveUser(response.customer, response.token);
-    Get.find<CommonController>().update(['customer_info','appointment_list']);
+    Get.find<CommonController>().successLoginLogic();
     if (redirectPath != null) {
       router.replace(redirectPath!, extra: redirectExtra);
     } else {

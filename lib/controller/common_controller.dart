@@ -1,3 +1,4 @@
+import 'package:dorry/utils/user_manager.dart';
 import 'package:get/get.dart';
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/model/customer/appointment_model.dart';
@@ -14,7 +15,12 @@ class CommonController extends GetxController {
   }
 
   fetchAppointments() async {
-    final response = await ApiService(isAuth: true).getRequest(ApiUri.customerAppointment);
+    if (CustomerManager.token == null) {
+      futureAppointments = [];
+      update(['appointment_list']);
+      return;
+    }
+    final response = await ApiService().getRequest(ApiUri.customerAppointment);
 
     if (response.statusCode == 200) {
       futureAppointments =
@@ -23,5 +29,10 @@ class CommonController extends GetxController {
     } else {
       throw Exception('Failed to load appointments');
     }
+  }
+
+  void successLoginLogic() {
+    fetchAppointments();
+    update(['customer_info']);
   }
 }

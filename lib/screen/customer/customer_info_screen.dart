@@ -64,7 +64,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
             padding: EdgeInsets.all(
               Sizes.paddingAll_12,
             ),
-            child: logic.futureAppointments.isEmpty
+            child: CustomerManager.user == null
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
