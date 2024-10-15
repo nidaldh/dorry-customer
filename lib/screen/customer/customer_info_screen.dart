@@ -78,6 +78,13 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
                         },
                         child: const Text('تسجيل الدخول'),
                       ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () {
+                          router.push(developerInfoPath);
+                        },
+                        child: const Text(' الدعم الفني'),
+                      ),
                     ],
                   )
                 : Column(
@@ -152,6 +159,13 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
                           );
                         },
                         child: const Text('الشروط والأحكام'),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: () {
+                          router.push(developerInfoPath);
+                        },
+                        child: const Text('الدعم الفني'),
                       ),
                       const SizedBox(height: 12),
                       if (Platform.isIOS && showDeleteButton)
