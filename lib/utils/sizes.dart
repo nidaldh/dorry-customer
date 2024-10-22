@@ -29,6 +29,8 @@ class Sizes {
   static double get offset_2 => 2.r;
 
   ///elevation_8
+  static double get elevation_1 =>1.r;
+  static double get elevation_3 =>3.r;
   static double get elevation_8 => 8.r;
   static double get elevation_4 => 4.r;
 

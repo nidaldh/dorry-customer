@@ -25,13 +25,15 @@ class ApiService {
         return handler.next(response);
       },
       onError: (DioException e, handler) async {
-        if (e.response?.statusCode == 401 && !isAuth && CustomerManager.token != null) {
+        if (e.response?.statusCode == 401 &&
+            !isAuth &&
+            CustomerManager.token != null) {
           await CustomerManager.clear();
           router.go('/login');
           return;
         }
         if (e.response?.statusCode == 500) {
-          errorSnackBar(e.response?.data['message']  ?? e.response?.data['error'] ?? 'خطأ غير معروف');
+          handleError(e);
         }
         return handler.next(e);
       },
@@ -74,6 +76,15 @@ class ApiService {
     } catch (e, s) {
       logError(e, s);
       rethrow;
+    }
+  }
+
+  void handleError(DioException e) {
+    dynamic data = e.response?.data;
+    if (data is Map) {
+      errorSnackBar(data['message'] ?? data['error'] ?? 'خطأ غير معروف');
+    } else {
+      errorSnackBar('خطأ غير معروف');
     }
   }
 

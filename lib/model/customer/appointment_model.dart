@@ -5,6 +5,8 @@ class Appointment {
   final double totalPrice;
   final String status;
   final String partner;
+  final String? storeName;
+  final dynamic storeId;
   final List<AppointmentService> services;
 
   Appointment({
@@ -15,6 +17,8 @@ class Appointment {
     required this.status,
     required this.partner,
     required this.services,
+    this.storeName,
+    this.storeId,
   });
 
   factory Appointment.fromJson(Map<String, dynamic> json) {
@@ -25,6 +29,8 @@ class Appointment {
       totalPrice: json['total_price'].toDouble(),
       status: json['status'],
       partner: json['partner'],
+      storeName: json['store_name'],
+      storeId: json['store_id'],
       services: (json['services'] as List)
           .map((service) => AppointmentService.fromJson(service))
           .toList(),

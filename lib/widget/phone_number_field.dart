@@ -1,4 +1,5 @@
 import 'package:dorry/controller/auth_controller.dart';
+import 'package:dorry/utils/validators.dart';
 import 'package:flutter/material.dart';
 
 class CustomPhoneNumberField extends StatefulWidget {
@@ -45,15 +46,7 @@ class _CustomPhoneNumberFieldState extends State<CustomPhoneNumberField> {
                     }
                     widget.authController.phoneNumberController.text = value;
                   },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'الرجاء إدخال رقم الهاتف';
-                    }
-                    if (value.length < 9 || value.length > 10) {
-                      return 'رقم الهاتف غير صحيح';
-                    }
-                    return null;
-                  },
+                  validator: Validators.validatePhoneNumber,
                   textDirection: TextDirection.ltr,
                   decoration: const InputDecoration(
                     fillColor: Colors.transparent,

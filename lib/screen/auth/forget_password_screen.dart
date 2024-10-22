@@ -5,7 +5,9 @@ import 'package:dorry/controller/auth_controller.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/api_service.dart';
-import 'package:dorry/widget/auth_scaffold.dart';
+import 'package:dorry/utils/sizes.dart';
+import 'package:dorry/utils/validators.dart';
+import 'package:dorry/widget/base_scaffold_widget.dart';
 import 'package:dorry/widget/phone_number_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,27 +29,46 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   bool isOtpSent = false;
   bool isOtpVerified = false;
   String _resetPasswordToken = '';
-  String statusMessage = '';
+  String statusMessage = 'أدخل رقم الهاتف الخاص بك لإعادة تعيين كلمة المرور';
+  bool isLoading = false;
 
   void _resetPassword() async {
+    setState(() {
+      isLoading = true;
+    });
     if (formKey.currentState!.validate()) {
-      final response = await authController.requestResetPassword();
+      try {
+        final response = await authController.requestResetPassword();
 
-      if (response is AuthFailedResponseModel) {
-        setState(() {
-          errorMessage = response.data.mobileNumber ?? response.message;
-        });
-      } else {
-        setState(() {
-          isOtpSent = true;
-          errorMessage = null;
-          statusMessage = 'أدخل رمز التحقق المرسل إلى الوتساب';
-        });
+        if (response is AuthFailedResponseModel) {
+          setState(() {
+            errorMessage = response.data.mobileNumber ?? response.message;
+          });
+        } else {
+          setState(() {
+            isOtpSent = true;
+            errorMessage = null;
+            statusMessage = 'أدخل رمز التحقق المرسل إلى الوتساب';
+          });
+        }
+      } catch (e) {
+        if (e is DioException) {
+          final res = AuthFailedResponseModel.fromJson(e.response!.data);
+          setState(() {
+            errorMessage = res.message;
+          });
+        }
       }
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void _verifyOtp() async {
+    setState(() {
+      isLoading = true;
+    });
     if (formKey.currentState!.validate()) {
       try {
         String phoneNumber = authController.phoneNumberController.text;
@@ -74,9 +95,15 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         }
       }
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> _updatePassword() async {
+    setState(() {
+      isLoading = true;
+    });
     if (formKey.currentState!.validate()) {
       final newPassword = newPasswordController.text;
       final confirmPassword = confirmPasswordController.text;
@@ -108,13 +135,17 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         });
       }
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return AuthScaffold(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+    return BaseScaffoldWidget(
+      title: 'إعادة تعيين كلمة المرور',
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: Sizes.horizontal_16),
         child: Form(
           key: formKey,
           child: SingleChildScrollView(
@@ -122,27 +153,17 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.only(bottom: 24),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: const Image(
-                      image: AssetImage('assets/image/icon.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+                SizedBox(height: Sizes.height_20),
                 if (statusMessage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      statusMessage,
-                      style: const TextStyle(
-                        color: kPrimaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    statusMessage,
+                    style: TextStyle(
+                      color: kPrimaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: Sizes.textSize_18,
                     ),
                   ),
+                SizedBox(height: Sizes.height_20),
                 if (!isOtpSent) ...[
                   CustomPhoneNumberField(
                     authController: authController,
@@ -150,38 +171,19 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                       authController.countryCode = code;
                     },
                   ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _resetPassword,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color(0xFF0C8B93),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'إعادة تعيين كلمة المرور',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+                  SizedBox(height: Sizes.height_20),
+                  submitButton(_resetPassword, 'إرسال رمز التحقق'),
                 ] else if (!isOtpVerified) ...[
                   TextFormField(
                     controller: otpController,
                     decoration: InputDecoration(
                       labelText: 'رمز التحقق',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(Sizes.radius_10),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 16),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: Sizes.vertical_15,
+                          horizontal: Sizes.horizontal_16),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -190,98 +192,46 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _verifyOtp,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color(0xFF0C8B93),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'تحقق',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+                  SizedBox(height: Sizes.height_20),
+                  submitButton(_verifyOtp, 'تحقق'),
                 ] else ...[
                   TextFormField(
                     controller: newPasswordController,
                     decoration: InputDecoration(
                       labelText: 'كلمة المرور الجديدة',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(Sizes.radius_10),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 16),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: Sizes.vertical_15,
+                          horizontal: Sizes.horizontal_16),
                     ),
                     obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'الرجاء إدخال كلمة المرور الجديدة';
-                      }
-                      if (value.length < 6) {
-                        return 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
-                      }
-                      return null;
-                    },
+                    validator: Validators.validatePassword,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: Sizes.height_16),
                   TextFormField(
-                    controller: confirmPasswordController,
-                    decoration: InputDecoration(
-                      labelText: 'تأكيد كلمة المرور',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 16),
-                    ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'الرجاء تأكيد كلمة المرور';
-                      }
-                      if (value != newPasswordController.text) {
-                        return 'كلمات المرور غير متطابقة';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _updatePassword,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color(0xFF0C8B93),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      controller: confirmPasswordController,
+                      decoration: InputDecoration(
+                        labelText: 'تأكيد كلمة المرور',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Sizes.radius_10),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: Sizes.vertical_15,
+                            horizontal: Sizes.horizontal_16),
                       ),
-                      child: const Text(
-                        'تحديث كلمة المرور',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+                      obscureText: true,
+                      validator: (value) {
+                        return Validators.confirmPassword(
+                            value, newPasswordController.text);
+                      }),
+                  SizedBox(height: Sizes.height_20),
+                  submitButton(_updatePassword, 'تحديث كلمة المرور'),
                 ],
                 if (errorMessage != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                    padding: EdgeInsets.only(top: Sizes.paddingAll_8),
                     child: Text(
                       errorMessage!,
                       style: const TextStyle(color: Colors.red),
@@ -292,6 +242,32 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget submitButton(VoidCallback? onPressed, String label) {
+    return SizedBox(
+      width: double.infinity,
+      child: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: kPrimaryColor,
+                padding: EdgeInsets.symmetric(vertical: Sizes.vertical_15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Sizes.radius_10),
+                ),
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: Sizes.textSize_18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
     );
   }
 }

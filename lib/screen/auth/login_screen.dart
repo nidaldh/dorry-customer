@@ -2,8 +2,8 @@ import 'package:dorry/app_theme.dart';
 import 'package:dorry/controller/auth_controller.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
 import 'package:dorry/router.dart';
-import 'package:dorry/widget/auth_scaffold.dart';
 import 'package:dorry/widget/auth_text_field.dart';
+import 'package:dorry/widget/base_scaffold_widget.dart';
 import 'package:dorry/widget/phone_number_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -52,8 +52,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AuthScaffold(
-      child: Padding(
+    return BaseScaffoldWidget(
+      title: null,
+      body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Form(
           key: formKey,

@@ -213,10 +213,8 @@ class ConfirmBookingScreen extends StatelessWidget {
         errorSnackBar('فشل في تأكيد الحجز');
       }
     } catch (e) {
-      if(e is DioException){
-        errorSnackBar('فشل في تأكيد الحجز: ${e.response?.data['message']}');
-      } else {
-        errorSnackBar('فشل في تأكيد الحجز: $e');
+      if (e is DioException) {
+        ApiService().handleError(e);
       }
       Navigator.of(context).pop(); // Close the loading dialog
     }

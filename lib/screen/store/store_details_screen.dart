@@ -7,6 +7,7 @@ import 'package:dorry/model/store/store_details_model.dart';
 import 'package:dorry/model/store/store_service_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
 import 'package:dorry/utils/sizes.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SalonDetailScreen extends StatefulWidget {
   final dynamic storeId;
@@ -118,11 +119,32 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                                       storeDetails!.image ??
                                           "https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg",
                                       fit: BoxFit.cover,
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                        if (loadingProgress == null) {
+                                          return child;
+                                        } else {
+                                          return Shimmer.fromColors(
+                                            baseColor: Colors.grey.shade300,
+                                            highlightColor: Colors.black,
+                                            child: Container(
+                                              color: Colors.grey,
+                                            ),
+                                          );
+                                        }
+                                      },
                                       errorBuilder:
-                                          (context, error, stackTrace) => Icon(
-                                        Icons.store,
-                                        size: Sizes.iconSize_50,
-                                        color: Colors.grey,
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                        height: Sizes.height_120,
+                                        color: Colors.grey.shade200,
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            size: Sizes.iconSize_100,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                     const DecoratedBox(
@@ -263,9 +285,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
       child: ElevatedButton(
         onPressed: () async {
           router.push(
-            '/partner-selection',
+            partnerSelectionPath,
             extra: {
-              'partners': storeDetails!.partners,
+              'storeId': storeDetails!.id,
               'bookingCart': _bookingCart,
             },
           );

@@ -19,9 +19,15 @@ class GenderModel {
     };
   }
 }
+
 final List<GenderModel> genderList = [
   GenderModel(name: 'ذكر', code: Gender.male),
   GenderModel(name: 'أنثى', code: Gender.female),
+];
+
+final List<GenderModel> genderLabelList = [
+  GenderModel(name: 'للرجال', code: Gender.male),
+  GenderModel(name: 'للنساء', code: Gender.female),
 ];
 
 enum Gender {

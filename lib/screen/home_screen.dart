@@ -128,11 +128,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.store),
-            label: 'قائمة الصالونات',
+            label: ' الصالونات',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
-            label: 'قائمة المواعيد',
+            label: ' المواعيد',
           ),
         ],
         selectedItemColor: Colors.blue,

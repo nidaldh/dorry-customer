@@ -1,9 +1,12 @@
+import 'package:dorry/app_theme.dart';
 import 'package:dorry/controller/auth_controller.dart';
 import 'package:dorry/model/gender_model.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
 import 'package:dorry/utils/app_snack_bar.dart';
-import 'package:dorry/widget/auth_scaffold.dart';
+import 'package:dorry/utils/sizes.dart';
+import 'package:dorry/utils/validators.dart';
 import 'package:dorry/widget/auth_text_field.dart';
+import 'package:dorry/widget/base_scaffold_widget.dart';
 import 'package:dorry/widget/phone_number_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,34 +26,50 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Map<String, String?> errors = {};
   bool isOtpSent = false;
   GenderModel? selectedGender;
+  bool isLoading = false;
 
   void _signUp() async {
-    if (_formKey.currentState!.validate()) {
-      final response = await authController.signUpWithPhone(
-        nameController.text,
-        selectedGender!,
-      );
-      if (response is AuthFailedResponseModel) {
-        setState(() {
-          errors = {
-            'name': response.data.name,
-            'mobileNumber': response.data.mobileNumber,
-            'password': response.data.password,
-            'otp': response.data.otp,
-          };
-        });
-      } else if (response == null) {
-        successSnackBar('تم إرسال الرمز الى رقم الوتساب');
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      if (_formKey.currentState!.validate()) {
+        final response = await authController.signUpWithPhone(
+          nameController.text,
+          selectedGender!,
+        );
+        if (response is AuthFailedResponseModel) {
+          setState(() {
+            errors = {
+              'name': response.data.name,
+              'mobileNumber': response.data.mobileNumber,
+              'password': response.data.password,
+              'otp': response.data.otp,
+            };
+          });
+        } else if (response == null) {
+          successSnackBar('تم إرسال الرمز الى رقم الوتساب');
 
-        setState(() {
-          isOtpSent = true;
-          errors = {};
-        });
+          setState(() {
+            isOtpSent = true;
+            errors = {};
+          });
+        }
       }
+    } catch (e) {
+      setState(() {
+        errors['name'] = e.toString();
+      });
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void _verifyOtp() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       final response = await authController.verifyOtp(
         otpController.text.trim(),
@@ -65,17 +84,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         });
       }
     } catch (e) {
-      print(e);
       setState(() {
         errors['otp'] = e.toString();
       });
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return AuthScaffold(
-      child: SingleChildScrollView(
+    return BaseScaffoldWidget(
+      title: 'إنشاء حساب',
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
@@ -84,16 +106,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.only(bottom: 24),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: const Image(
-                      image: AssetImage('assets/image/icon.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+                Padding(padding: const EdgeInsets.only(top: 16)),
                 if (!isOtpSent) ...[
                   AuthTextField(
                     controller: nameController,
@@ -102,12 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     isPassword: false,
                     isPasswordVisible: false,
                     togglePasswordVisibility: () {},
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'الرجاء إدخال الاسم';
-                      }
-                      return null;
-                    },
+                    validator: Validators.validateName,
                     errorText: errors['name'],
                   ),
                   const SizedBox(height: 16),
@@ -128,12 +136,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             authController.isPasswordVisible.value,
                         togglePasswordVisibility:
                             authController.togglePasswordVisibility,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'الرجاء إدخال كلمة المرور';
-                          }
-                          return null;
-                        },
+                        validator: Validators.validatePassword,
                         errorText: errors['password'],
                       )),
                   const SizedBox(height: 24),
@@ -164,37 +167,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _signUp,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color(0xFF0C8B93),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'إنشاء حساب',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  submitButton(_signUp, 'إنشاء حساب'),
+                ] else ...[
+                  Text(
+                    'تم إرسال الرمز الى رقم الوتساب',
+                    style: TextStyle(
+                      color: kPrimaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: Sizes.textSize_18,
                     ),
                   ),
-                ] else ...[
+                  const SizedBox(height: 20),
                   AuthTextField(
                     controller: otpController,
                     labelText: 'الرمز',
                     prefixIcon: Icons.lock,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'الرجاء إدخال OTP';
+                        return 'الرجاء إدخال الرمز';
                       }
                       return null;
                     },
@@ -208,33 +198,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                   const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _verifyOtp,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color(0xFF0C8B93),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'تحقق من OTP',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+                  submitButton(_verifyOtp, 'تحقق'),
                 ],
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget submitButton(VoidCallback? onPressed, String label) {
+    return SizedBox(
+      width: double.infinity,
+      child: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: kPrimaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
     );
   }
 }

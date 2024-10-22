@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:dorry/app_theme.dart';
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/model/store/available_slot_blocks.dart';
@@ -9,14 +10,16 @@ import 'package:flutter/material.dart';
 import 'package:dorry/model/store/store_user_model.dart';
 import 'package:dorry/model/store/booking_cart.dart';
 import 'package:dorry/utils/api_service.dart';
+import 'package:get/get.dart';
+import 'package:dorry/controller/common_controller.dart';
 
 class PartnerSelectionScreen extends StatefulWidget {
-  final List<StorePartnerModel> partners;
   final BookingCartModel bookingCart;
+  final dynamic storeId;
 
   const PartnerSelectionScreen({
     super.key,
-    required this.partners,
+    required this.storeId,
     required this.bookingCart,
   });
 
@@ -25,11 +28,56 @@ class PartnerSelectionScreen extends StatefulWidget {
 }
 
 class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
+  List<StorePartnerModel>? partners;
   List<AvailableSlotBlock>? allTimeSlots;
   List<AvailableSlotBlock>? filteredTimeSlots;
   bool isLoading = false;
   StorePartnerModel? selectedPartner;
   DateTime selectedDate = DateTime.now();
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPartners();
+  }
+
+  void _fetchPartners() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      Map<String, dynamic> servicesIds = prepareServicesData();
+
+      final response = await ApiService().getRequest(
+        "${ApiUri.store}/${widget.storeId}/available-partners",
+        queryParameters: servicesIds,
+      );
+      setState(() {
+        partners = (response.data['partners'] as List)
+            .map((json) => StorePartnerModel.fromJson(json))
+            .toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      if (e is DioException) {
+        dynamic data = e.response?.data;
+        if (data is Map) {
+          error = data['message'] ?? data['error'] ?? 'خطأ غير معروف';
+        } else {
+          error = 'خطأ غير معروف';
+        }
+        ApiService().handleError(e);
+        return;
+      }
+      errorSnackBar('Failed to load partners: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   void _fetchAvailableTimeSlots() async {
     if (selectedPartner == null) return;
@@ -39,12 +87,18 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
     });
 
     try {
+      // send services ids
+      Map<dynamic, dynamic> servicesIds = prepareServicesData();
+
+      Map<String, dynamic> data = {
+        'duration': widget.bookingCart.totalDuration,
+        'partner_id': selectedPartner!.id,
+        ...servicesIds,
+      };
+
       final response = await ApiService().getRequest(
         ApiUri.availableTimeSlots,
-        queryParameters: {
-          'duration': widget.bookingCart.totalDuration,
-          'partner_id': selectedPartner!.id,
-        },
+        queryParameters: data,
       );
 
       setState(() {
@@ -54,12 +108,27 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
         _filterTimeSlotsByDate(selectedDate);
         isLoading = false;
       });
-    } catch (e) {
+    } catch (e, s) {
+      if (e is DioException) {
+        ApiService().handleError(e);
+        return;
+      }
+      errorSnackBar('فشل في تحميل الوقت المتاح: $e');
+    } finally {
       setState(() {
         isLoading = false;
       });
-      errorSnackBar('فشل في تحميل الوقت المتاح: $e');
     }
+  }
+
+  Map<String, dynamic> prepareServicesData() {
+    Map<String, dynamic> servicesIds = {};
+    int i = 0;
+    for (var service in widget.bookingCart.selectedServices) {
+      servicesIds.addAll({"services_ids[$i]": service.id});
+      i++;
+    }
+    return servicesIds;
   }
 
   void _filterTimeSlotsByDate(DateTime date) {
@@ -102,6 +171,19 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
       );
     }
 
+    if (partners == null && isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (error != null) {
+      return Center(
+        child: Text(
+          error!,
+          style: const TextStyle(fontSize: 16, color: Colors.redAccent),
+        ),
+      );
+    }
+
     return GridView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.all(16),
@@ -111,9 +193,9 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: widget.partners.length,
+      itemCount: partners!.length,
       itemBuilder: (context, index) {
-        final user = widget.partners[index];
+        final user = partners![index];
         return GestureDetector(
           onTap: () {
             setState(() {
@@ -246,13 +328,7 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
             onTap: () async {
               final customer = CustomerManager.user;
               if (customer == null) {
-                redirectPath = '/confirm-booking';
-                redirectExtra = {
-                  'selectedPartner': selectedPartner,
-                  'selectedSlot': slot,
-                  'bookingCart': widget.bookingCart,
-                };
-                router.replace('/login');
+                _showLoginDialog(context, slot);
                 return;
               }
               router.replace('/confirm-booking', extra: {
@@ -271,34 +347,71 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Row(
-          children: [
-            Icon(Icons.group, size: 24),
-            SizedBox(width: 8),
-            Text('اختر الزميل'),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              _buildUserList(),
-              if (selectedPartner != null) _buildDateSelector(),
-              if (selectedPartner != null) _buildAvailableSlots(),
-            ],
+  void _showLoginDialog(
+    BuildContext context,
+    slot,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('لاكمال الحجز يجب تسجيل الدخول'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('إلغاء'),
           ),
-          if (isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              redirectPath = '/confirm-booking';
+              redirectExtra = {
+                'selectedPartner': selectedPartner,
+                'selectedSlot': slot,
+                'bookingCart': widget.bookingCart,
+              };
+
+              router.replace('/login');
+            },
+            child: const Text('تسجيل الدخول'),
+          ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<CommonController>(
+      id: 'partner_selection',
+      builder: (controller) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Row(
+              children: [
+                Icon(Icons.group, size: 24),
+                SizedBox(width: 8),
+                Text('اختر الزميل'),
+              ],
+            ),
+            centerTitle: true,
+          ),
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  _buildUserList(),
+                  if (selectedPartner != null) _buildDateSelector(),
+                  if (selectedPartner != null) _buildAvailableSlots(),
+                ],
+              ),
+              if (isLoading)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

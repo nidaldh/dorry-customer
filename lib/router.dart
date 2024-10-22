@@ -87,10 +87,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         appContext = context;
         final extra = state.extra as Map<String, dynamic>;
-        final partners = extra['partners'];
+        final storeId = extra['storeId'];
         final bookingCart = extra['bookingCart'];
         return PartnerSelectionScreen(
-          partners: partners,
+          storeId: storeId,
           bookingCart: bookingCart,
         );
       },

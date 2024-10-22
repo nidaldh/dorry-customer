@@ -137,7 +137,8 @@ class AuthController extends GetxController {
     final response = await _apiService.postRequest(ApiUri.logout, {});
     if (response.statusCode == 200) {
       await CustomerManager.clear();
-      Get.find<CommonController>().update(['customer_info','appointment_list']);
+      Get.find<CommonController>()
+          .update(['customer_info', 'appointment_list']);
       router.go('/');
     } else {
       errorSnackBar("Sign Out Failed ${response.data['message']}");
@@ -152,9 +153,7 @@ class AuthController extends GetxController {
           .postRequest('/api/customer/password/request-reset', {
         'mobile_number': phoneNumber,
       });
-      if (response.statusCode == 200) {
-        successSnackBar("تم رمز إعادة تعيين كلمة المرور إلى الوتساب.");
-      } else {
+      if (response.statusCode != 200) {
         errorSnackBar("Failed ${response.data['message']}");
       }
     } catch (e, s) {
