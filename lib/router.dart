@@ -2,6 +2,7 @@ import 'package:dorry/main.dart';
 import 'package:dorry/screen/appointments/appointment_details_screen.dart';
 import 'package:dorry/screen/auth/forget_password_screen.dart';
 import 'package:dorry/screen/auth/verify_otp_screen.dart';
+import 'package:dorry/screen/customer/customer_form_screen.dart';
 import 'package:dorry/screen/developer/developer_info_screen.dart';
 import 'package:dorry/screen/home_screen.dart';
 import 'package:dorry/screen/auth/login_screen.dart';
@@ -64,7 +65,7 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         appContext = context;
         final dynamic storeId = state.pathParameters['storeId'];
-        return SalonDetailScreen(storeId: storeId);
+        return StoreDetailScreen(storeId: storeId);
       },
     ),
     GoRoute(
@@ -118,6 +119,12 @@ final GoRouter router = GoRouter(
         return const UpdateScreen();
       },
     ),
+    GoRoute(
+        path: customerFormPath,
+        builder: (context, state) {
+          appContext = context;
+          return const CustomerFormScreen();
+        }),
   ],
 );
 
@@ -147,3 +154,4 @@ const String partnerSelectionPath = '/partner-selection';
 const String appointmentPath = '/appointment/:id';
 const String developerInfoPath = '/developer-info';
 const String needUpdatePath = '/update';
+const String customerFormPath = '/customer-form';

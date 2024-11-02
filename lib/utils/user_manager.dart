@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:dorry/const/api_uri.dart';
+import 'package:dorry/model/response/auth/success_response_model.dart';
 import 'package:dorry/model/store/store_model.dart';
 import 'package:dorry/model/customer_model.dart';
+import 'package:dorry/utils/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerManager {
@@ -53,5 +56,19 @@ class CustomerManager {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
     token = null;
+  }
+
+  static Future<bool> customerInfo() async {
+    try {
+      final response = await ApiService(isAuth: true).getRequest(ApiUri.info);
+      if (response.statusCode == 200) {
+        final data = SuccessResponseModel.fromJson(response.data);
+        await CustomerManager.saveUser(data.customer, data.token);
+        return true;
+      }
+    } catch (e) {
+      CustomerManager.clear();
+    }
+    return false;
   }
 }

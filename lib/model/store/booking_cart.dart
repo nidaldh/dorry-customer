@@ -21,4 +21,7 @@ class BookingCartModel {
 
   List<StoreServiceModel> get selectedServices =>
       List.unmodifiable(_selectedServices);
+
+  bool get hasStandalone =>
+      _selectedServices.any((service) => service.isStandalone == 1);
 }

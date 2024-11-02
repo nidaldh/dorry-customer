@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dorry/app_theme.dart';
 import 'package:dorry/controller/common_controller.dart';
 import 'package:dorry/main.dart';
 import 'package:dorry/router.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dorry/controller/auth_controller.dart';
 import 'package:dorry/utils/user_manager.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class CustomerInfoScreen extends StatefulWidget {
   const CustomerInfoScreen({super.key});
@@ -36,6 +38,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
                       }
                     },
                     icon: const Icon(Icons.logout),
+                    tooltip: 'تسجيل الخروج',
                   ),
                 ]
               : [],
@@ -72,71 +75,126 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
   }
 
   Widget _buildLoggedOutView(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Center(
-          child: Text('الرجاء تسجيل الدخول لعرض معلومات الحساب'),
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.account_circle, size: 100, color: kPrimaryColor),
+            SizedBox(height: Sizes.height_20),
+            Text(
+              'قم بتسجيل الدخول للوصول إلى حسابك',
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: Sizes.height_20),
+            ElevatedButton(
+              onPressed: () {
+                router.push(loginPath);
+              },
+              child: const Text('تسجيل الدخول'),
+            ),
+            SizedBox(height: Sizes.height_20),
+            TextButton(
+              onPressed: () {
+                router.push(developerInfoPath);
+              },
+              child: const Text('تواصل معنا'),
+            ),
+          ],
         ),
-        SizedBox(height: Sizes.height_20),
-        ElevatedButton(
-          onPressed: () {
-            router.push(loginPath);
-          },
-          child: const Text('تسجيل الدخول'),
-        ),
-        SizedBox(height: Sizes.height_20),
-        ElevatedButton(
-          onPressed: () {
-            router.push(developerInfoPath);
-          },
-          child: const Text('تواصل معنا'),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildLoggedInView(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Center(
-          child: CircleAvatar(
-            radius: Sizes.radius_50,
-            backgroundColor: Colors.deepPurple,
-            child: Text(
-              CustomerManager.user!.name[0].toUpperCase(),
-              style:
-                  TextStyle(fontSize: Sizes.textSize_40, color: Colors.white),
-            ),
+    final user = CustomerManager.user!;
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'مرحبا، ${user.name}',
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
-        ),
-        SizedBox(height: Sizes.height_20),
-        _buildUserInfoCard(context),
-        SizedBox(height: Sizes.height_20),
-        ElevatedButton(
-          onPressed: () {
-            router.push(developerInfoPath);
-          },
-          child: const Text('تواصل معنا'),
-        ),
-        SizedBox(height: Sizes.height_10),
-        if (Platform.isIOS && showDeleteButton)
-          ElevatedButton(
-            onPressed: () async {
-              final shouldDelete = await _showDeleteAccountDialog(context);
-              if (shouldDelete == true) {
-                Get.find<AuthController>().signOut();
-              }
+          SizedBox(height: Sizes.height_20),
+          if (user.qrCode != null)
+            Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: kPrimaryColor,
+                      width: 2,
+                    ),
+                  ),
+                  child: QrImageView(
+                    data: user.prepareForQrCode(),
+                    version: QrVersions.auto,
+                    size: Sizes.size_200,
+                    semanticsLabel: 'رمز الاستجابة السريعة',
+                    dataModuleStyle: QrDataModuleStyle(
+                      dataModuleShape: QrDataModuleShape.circle,
+                      color: kPrimaryColor,
+                    ),
+                    eyeStyle: QrEyeStyle(
+                      eyeShape: QrEyeShape.circle,
+                      color: kPrimaryColor,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'رمز الاضافة السريعة',
+                      style: TextStyle(
+                        color: kPrimaryColor,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          SizedBox(height: Sizes.height_20),
+          _buildUserInfoCard(context),
+          SizedBox(height: Sizes.height_20),
+          ElevatedButton.icon(
+            onPressed: () {
+              router.push(customerFormPath);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('حذف الحساب'),
+            icon: Icon(Icons.edit),
+            label: const Text('تعديل المعلومات'),
           ),
-        _buildPrivacyAndTermsLinks(context),
-      ],
+          ElevatedButton.icon(
+            onPressed: () {
+              router.push(developerInfoPath);
+            },
+            icon: Icon(Icons.contact_mail),
+            label: const Text('تواصل معنا'),
+          ),
+          SizedBox(height: Sizes.height_10),
+          if (Platform.isIOS && showDeleteButton)
+            ElevatedButton.icon(
+              onPressed: () async {
+                final shouldDelete = await _showDeleteAccountDialog(context);
+                if (shouldDelete == true) {
+                  // Call delete account function here
+                  // For example: await AuthController.deleteAccount();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              icon: Icon(Icons.delete_forever),
+              label: const Text('حذف الحساب'),
+            ),
+          SizedBox(height: Sizes.height_20),
+          _buildPrivacyAndTermsLinks(context),
+        ],
+      ),
     );
   }
 
@@ -146,7 +204,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
       builder: (context) => AlertDialog(
         title: const Text('حذف الحساب'),
         content: const Text(
-            'سيتم حذف معلومات الحساب بعد ١٤ يوم من الان، في حال قررت التراجع عن هذا القرار يمكن تسجيل الدخول قبل انقضاء المدة'),
+            'سيتم حذف معلومات الحساب بعد ١٤ يومًا من الآن. إذا قررت التراجع عن هذا القرار، يمكنك تسجيل الدخول قبل انقضاء المدة.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -162,6 +220,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
   }
 
   Widget _buildUserInfoCard(BuildContext context) {
+    final user = CustomerManager.user!;
     return Card(
       elevation: Sizes.elevation_4,
       shape: RoundedRectangleBorder(
@@ -172,54 +231,70 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'الاسم: ${CustomerManager.user!.name}',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            SizedBox(height: Sizes.height_8),
-            Text(
-              'رقم الهاتف: ${CustomerManager.user!.mobileNumber}',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            _buildUserInfoRow(Icons.person, 'الاسم', user.name),
+            Divider(),
+            _buildUserInfoRow(Icons.phone, 'رقم الهاتف', user.mobileNumber),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPrivacyAndTermsLinks(BuildContext context) {
+  Widget _buildUserInfoRow(IconData icon, String label, String value) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const WebViewScreen(
-                  url: 'https://dorry.khidmatna.com/privacy-policy',
-                  title: 'سياسة الخصوصية',
-                ),
-              ),
-            );
-          },
-          child: const Text('سياسة الخصوصية'),
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const WebViewScreen(
-                  url: 'https://dorry.khidmatna.com/terms-and-conditions',
-                  title: 'الشروط والأحكام',
-                ),
-              ),
-            );
-          },
-          child: const Text('الشروط والأحكام'),
+        Icon(icon, color: kPrimaryColor),
+        SizedBox(width: Sizes.width_8),
+        Text(
+          '$label: $value',
+          style: TextStyle(fontSize: 16),
         ),
       ],
+    );
+  }
+
+  Widget _buildPrivacyAndTermsLinks(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: Sizes.height_10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildLinkText(
+            context,
+            'سياسة الخصوصية',
+            'https://dorry.khidmatna.com/privacy-policy',
+          ),
+          SizedBox(width: Sizes.width_20),
+          _buildLinkText(
+            context,
+            'الشروط والأحكام',
+            'https://dorry.khidmatna.com/terms-and-conditions',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinkText(BuildContext context, String text, String url) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => WebViewScreen(
+              url: url,
+              title: text,
+            ),
+          ),
+        );
+      },
+      child: Text(
+        text,
+        style: TextStyle(
+          color: kPrimaryColor,
+          decoration: TextDecoration.underline,
+        ),
+      ),
     );
   }
 }

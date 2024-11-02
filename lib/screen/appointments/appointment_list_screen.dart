@@ -96,11 +96,15 @@ class _AppointmentsListScreenState extends State<AppointmentsListScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          ' ${appointment.storeName}',
-          style: TextStyle(
-            fontSize: Sizes.textSize_18,
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            ' ${appointment.storeName}',
+            style: TextStyle(
+              fontSize: Sizes.textSize_18,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         if (isToday)

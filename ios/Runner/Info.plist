@@ -54,6 +54,8 @@
     <false/>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>We require access to your photo library to allow you to upload images and media within the app.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>We require access to your camera to allow you to scan QR code.</string>
     <key>LSApplicationQueriesSchemes</key>
     <array>
       <string>sms</string>

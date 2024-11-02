@@ -1,320 +1,202 @@
-import 'package:dorry/router.dart';
-import 'package:dorry/utils/app_snack_bar.dart';
+import 'package:dorry/widget/store/services_section.dart';
+import 'package:dorry/widget/store/social_media_actions.dart';
 import 'package:flutter/material.dart';
-import 'package:dorry/const/api_uri.dart';
-import 'package:dorry/utils/api_service.dart';
-import 'package:dorry/model/store/store_details_model.dart';
-import 'package:dorry/model/store/store_service_model.dart';
-import 'package:dorry/model/store/booking_cart.dart';
+import 'package:dorry/providers/store_provider.dart';
 import 'package:dorry/utils/sizes.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:provider/provider.dart';
 
-class SalonDetailScreen extends StatefulWidget {
+class StoreDetailScreen extends StatefulWidget {
   final dynamic storeId;
 
-  const SalonDetailScreen({super.key, required this.storeId});
+  const StoreDetailScreen({super.key, required this.storeId});
 
   @override
-  _SalonDetailScreenState createState() => _SalonDetailScreenState();
+  _StoreDetailScreenState createState() => _StoreDetailScreenState();
 }
 
-class _SalonDetailScreenState extends State<SalonDetailScreen> {
-  StoreDetailsModel? storeDetails;
-  bool isLoading = true;
-  final BookingCartModel _bookingCart = BookingCartModel();
-
-  @override
-  void initState() {
-    super.initState();
-    fetchStoreDetails(widget.storeId);
-  }
-
-  void fetchStoreDetails(dynamic storeId) async {
-    try {
-      final response =
-          await ApiService().getRequest('${ApiUri.store}/$storeId');
-      if (response.statusCode == 200) {
-        setState(() {
-          storeDetails = StoreDetailsModel.fromJson(response.data);
-          isLoading = false;
-        });
-      } else {
-        _showError();
-      }
-    } catch (e, s) {
-      ApiService().logError(e, s);
-      _showError();
-    }
-  }
-
-  void _showError() {
-    setState(() {
-      isLoading = false;
-    });
-    errorSnackBar('فشل في تحميل تفاصيل المتجر.');
-  }
-
-  void _toggleCart(StoreServiceModel service) {
-    setState(() {
-      if (_bookingCart.selectedServices.contains(service)) {
-        _bookingCart.removeService(service);
-      } else {
-        _bookingCart.addService(service);
-      }
-    });
-  }
-
+class _StoreDetailScreenState extends State<StoreDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(),
-                  SizedBox(height: Sizes.height_16),
-                  Text(
-                    'جارٍ تحميل تفاصيل المتجر...',
-                    style: TextStyle(fontSize: Sizes.textSize_16),
-                  ),
-                ],
+    return ChangeNotifierProvider(
+      create: (_) => StoreProvider()..fetchStoreDetails(widget.storeId),
+      child: Consumer<StoreProvider>(
+        builder: (context, storeProvider, child) {
+          if (storeProvider.isLoading) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('جارٍ التحميل...'),
+                centerTitle: true,
               ),
-            )
-          : storeDetails != null
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: CustomScrollView(
-                        slivers: [
-                          SliverAppBar(
-                            expandedHeight: Sizes.height_200,
-                            pinned: true,
-                            flexibleSpace: FlexibleSpaceBar(
-                              title: Text(
-                                storeDetails!.name,
-                                //add stroke to text
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: Sizes.textSize_16,
-                                  shadows: [
-                                    Shadow(
-                                      blurRadius: 5,
-                                      color: Colors.black,
-                                      offset: Offset(1.0, 1.0),
-                                    ),
-                                  ],
-                                ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            );
+          }
+
+          if (storeProvider.storeDetails == null) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('خطأ'),
+                centerTitle: true,
+              ),
+              body: Center(
+                child: Text(
+                  'فشل في تحميل تفاصيل المتجر.',
+                  style: TextStyle(
+                    fontSize: Sizes.textSize_18,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final storeDetails = storeProvider.storeDetails!;
+
+          return Scaffold(
+            body: Stack(
+              children: [
+                NestedScrollView(
+                  headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                    SliverAppBar(
+                      expandedHeight: Sizes.height_200,
+                      pinned: true,
+                      flexibleSpace: FlexibleSpaceBar(
+                        title: Text(
+                          storeDetails.name,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: Sizes.textSize_16,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 5,
+                                color: Colors.black,
+                                offset: Offset(1.0, 1.0),
                               ),
-                              background: Hero(
-                                tag: 'storeImage-${widget.storeId}',
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    Image.network(
-                                      storeDetails!.image ??
-                                          "https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg",
-                                      fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                        if (loadingProgress == null) {
-                                          return child;
-                                        } else {
-                                          return Shimmer.fromColors(
-                                            baseColor: Colors.grey.shade300,
-                                            highlightColor: Colors.black,
-                                            child: Container(
-                                              color: Colors.grey,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              Container(
-                                        height: Sizes.height_120,
-                                        color: Colors.grey.shade200,
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.broken_image,
-                                            size: Sizes.iconSize_100,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Colors.black54,
-                                            Colors.transparent
-                                          ],
-                                          begin: Alignment.bottomCenter,
-                                          end: Alignment.topCenter,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        background: Hero(
+                          tag: 'storeImage-${widget.storeId}',
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.network(
+                                storeDetails.image ??
+                                    "https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg",
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                  color: Colors.grey.shade200,
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    size: Sizes.iconSize_100,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.all(Sizes.paddingAll_16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (storeDetails!.address != null ||
-                                      storeDetails!.area != null) ...[
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_on,
-                                            color: Colors.grey),
-                                        SizedBox(width: Sizes.width_8),
-                                        Expanded(
-                                          child: Text(
-                                            "${storeDetails!.area ?? ''}, ${storeDetails!.address ?? ''}",
-                                            style: TextStyle(
-                                                fontSize: Sizes.textSize_16,
-                                                color: Colors.black87),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                  _buildServicesSection(),
-                                  SizedBox(height: Sizes.height_30),
-                                ],
+                              const DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.black54,
+                                      Colors.transparent
+                                    ],
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                    _buildBookButton(),
                   ],
-                )
-              : Center(
-                  child: Padding(
+                  body: SingleChildScrollView(
                     padding: EdgeInsets.all(Sizes.paddingAll_16),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.error,
-                            size: Sizes.iconSize_60, color: Colors.red),
+                        // Address
+                        if (storeDetails.address != null ||
+                            storeDetails.area != null)
+                          Row(
+                            children: [
+                              Icon(Icons.location_on, color: Colors.grey),
+                              SizedBox(width: Sizes.width_8),
+                              Expanded(
+                                child: Text(
+                                  "${storeDetails.area ?? ''}, ${storeDetails.address ?? ''}",
+                                  style: TextStyle(
+                                    fontSize: Sizes.textSize_16,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         SizedBox(height: Sizes.height_16),
-                        Text(
-                          'فشل في تحميل تفاصيل المتجر.',
-                          style: TextStyle(fontSize: Sizes.textSize_18),
-                          textAlign: TextAlign.center,
+                        _buildBioSection(storeDetails.bio ?? ''),
+                        ServicesSection(
+                          storeProvider: storeProvider,
                         ),
+                        SocialMediaActions(
+                          storeDetails: storeDetails,
+                        ),
+                        if (storeProvider
+                            .bookingCart.selectedServices.isNotEmpty)
+                          SizedBox(height: Sizes.height_60),
                       ],
                     ),
                   ),
                 ),
-    );
-  }
-
-  Widget _buildServicesSection() {
-    return _buildSection(
-      title: 'الخدمات',
-      child: Column(
-        children: storeDetails!.services
-            .map((service) => _buildServiceItem(
-                  service.name,
-                  '₪${service.price} - ${service.duration} دقيقة',
-                  service,
-                ))
-            .toList(),
+                if (storeProvider.bookingCart.selectedServices.isNotEmpty)
+                  Positioned(
+                    bottom: Sizes.height_16,
+                    left: Sizes.width_10,
+                    right: Sizes.width_10,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        storeProvider.goToPartnerSelection();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding:
+                            EdgeInsets.symmetric(vertical: Sizes.vertical_15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(Sizes.radius_30),
+                        ),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        elevation: Sizes.elevation_8,
+                      ),
+                      child: const Text(
+                        'اختر الزميل',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildServiceItem(
-      String name, String price, StoreServiceModel service) {
-    final isSelected = _bookingCart.selectedServices.contains(service);
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: Sizes.vertical_5),
-      elevation: isSelected ? Sizes.elevation_8 : Sizes.elevation_4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Sizes.radius_15),
-      ),
-      color: isSelected ? Colors.blue[50] : Colors.white,
-      child: ListTile(
-        contentPadding: EdgeInsets.all(Sizes.paddingAll_16),
-        leading: Icon(
-          isSelected ? Icons.check_circle : Icons.circle,
-          color: isSelected ? Colors.green : Colors.grey,
-        ),
-        title: Text(
-          name,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: Sizes.textSize_16,
-            color: isSelected ? Colors.blueAccent : Colors.black,
-          ),
-        ),
-        subtitle: Text(
-          price,
-          style: TextStyle(fontSize: Sizes.textSize_14),
-        ),
-        trailing: IconButton(
-          icon: Icon(
-            isSelected ? Icons.remove : Icons.add,
-            color: isSelected ? Colors.red : Colors.green,
-          ),
-          onPressed: () => _toggleCart(service),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBookButton() {
-    if (_bookingCart.selectedServices.isEmpty) {
+  Widget _buildBioSection(String bio) {
+    if (bio.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () async {
-          router.push(
-            partnerSelectionPath,
-            extra: {
-              'storeId': storeDetails!.id,
-              'bookingCart': _bookingCart,
-            },
-          );
-        },
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: Sizes.vertical_15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(Sizes.radius_30),
-          ),
-          backgroundColor: Colors.blueAccent,
-          shadowColor: Colors.blueAccent.withOpacity(0.5),
-          elevation: Sizes.elevation_8,
-        ),
-        child: Text(
-          'اختر الزميل',
-          style: TextStyle(fontSize: Sizes.textSize_18, color: Colors.white),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSection({required String title, required Widget child}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          title,
+          'من نحن',
           style: TextStyle(
             fontSize: Sizes.textSize_22,
             fontWeight: FontWeight.bold,
@@ -322,7 +204,10 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
           ),
         ),
         SizedBox(height: Sizes.height_8),
-        child,
+        Text(
+          bio,
+          style: TextStyle(fontSize: Sizes.textSize_16),
+        ),
       ],
     );
   }

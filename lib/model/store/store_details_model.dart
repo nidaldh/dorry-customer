@@ -7,10 +7,14 @@ class StoreDetailsModel {
   final String storeType;
   final dynamic partnerId;
   final List<StorePartnerModel> partners;
-  final List<StoreServiceModel> services;
   final String? image;
   final String? area;
   final String? address;
+  final String? facebookLink;
+  final String? instagramLink;
+  final String? snapchatLink;
+  final String? tiktokLink;
+  final String? bio;
 
   StoreDetailsModel({
     required this.id,
@@ -18,10 +22,14 @@ class StoreDetailsModel {
     required this.storeType,
     required this.partnerId,
     required this.partners,
-    required this.services,
     this.image,
     this.area,
     this.address,
+    this.facebookLink,
+    this.instagramLink,
+    this.snapchatLink,
+    this.tiktokLink,
+    this.bio,
   });
 
   factory StoreDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -36,9 +44,11 @@ class StoreDetailsModel {
       partners: (json['partners'] as List)
           .map((user) => StorePartnerModel.fromJson(user))
           .toList(),
-      services: (json['services'] as List)
-          .map((service) => StoreServiceModel.fromJson(service))
-          .toList(),
+      facebookLink: json['facebook_link'],
+      instagramLink: json['instagram_link'],
+      snapchatLink: json['snapchat_link'],
+      tiktokLink: json['tiktok_link'],
+      bio: json['bio'],
     );
   }
 }

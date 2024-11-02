@@ -28,16 +28,16 @@ class _SplashScreenState extends State<SplashScreen> {
         return;
       }
       final token = await CustomerManager.getToken();
-      if (token != null && await _customerInfo()) {
+      if (token != null && await CustomerManager.customerInfo()) {
         await CustomerManager.getUser();
-        router.replace('/home');
+        router.replace(homePath);
         return;
       }
     } catch (e) {
       if (kDebugMode) print(e);
       CustomerManager.clear();
     }
-    router.replace('/home');
+    router.replace(homePath);
   }
 
   Future<bool> _checkForUpdate() async {
@@ -52,20 +52,6 @@ class _SplashScreenState extends State<SplashScreen> {
     } catch (e) {
       if (kDebugMode) print(e);
       showDeleteButton = false;
-    }
-    return false;
-  }
-
-  Future<bool> _customerInfo() async {
-    try {
-      final response = await ApiService(isAuth: true).getRequest(ApiUri.info);
-      if (response.statusCode == 200) {
-        final data = SuccessResponseModel.fromJson(response.data);
-        await CustomerManager.saveUser(data.customer, data.token);
-        return true;
-      }
-    } catch (e) {
-      CustomerManager.clear();
     }
     return false;
   }

@@ -4,6 +4,9 @@ class StoreServiceModel {
   final num price;
   final int duration;
   final String? description;
+  final String? category;
+  final int? isStandalone;
+  final num? discountPrice;
 
   StoreServiceModel({
     required this.id,
@@ -11,6 +14,9 @@ class StoreServiceModel {
     required this.price,
     required this.duration,
     this.description,
+    this.category,
+    this.isStandalone,
+    this.discountPrice,
   });
 
   factory StoreServiceModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +26,9 @@ class StoreServiceModel {
       price: json['price'],
       duration: json['duration'],
       description: json['description'],
+      category: json['category'],
+      isStandalone: json['is_standalone'],
+      discountPrice: json['discount_price'],
     );
   }
 
@@ -30,6 +39,9 @@ class StoreServiceModel {
       'price': price,
       'duration': duration,
       'description': description,
+      'category': category,
+      'is_standalone': isStandalone,
+      'discount_price': discountPrice,
     };
   }
 }

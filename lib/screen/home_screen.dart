@@ -1,12 +1,17 @@
 import 'dart:io';
 
+import 'package:dorry/app_theme.dart';
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/main.dart';
 import 'package:dorry/screen/appointments/appointment_list_screen.dart';
 import 'package:dorry/screen/customer/customer_info_screen.dart';
+import 'package:dorry/screen/qr_scanner_screen.dart';
 import 'package:dorry/screen/store/store_list_screen.dart';
 import 'package:dorry/utils/api_service.dart';
+import 'package:dorry/utils/sizes.dart';
 import 'package:dorry/utils/user_manager.dart';
+import 'package:dorry/widget/base_scaffold_widget.dart';
+
 // import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -104,12 +109,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     const CustomerInfoScreen(),
     const StoreListScreen(),
+    const QRScannerScreen(),
     const AppointmentsListScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BaseScaffoldWidget(
+      showAppBar: false,
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
@@ -121,28 +128,40 @@ class _HomeScreenState extends State<HomeScreen> {
             _currentIndex = index;
           });
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'المعلومات الشخصية',
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'حسابي',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.store),
-            label: ' الصالونات',
+            icon: Icon(Icons.explore_rounded),
+            activeIcon: Icon(Icons.explore_outlined),
+            label: 'استكشف',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: ' المواعيد',
+            icon: Icon(Icons.qr_code_scanner_outlined),
+            activeIcon: Icon(Icons.qr_code_scanner),
+            label: 'QR',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today_outlined),
+            activeIcon: Icon(Icons.calendar_today),
+            label: 'المواعيد',
           ),
         ],
-        selectedItemColor: Colors.blue,
+        selectedItemColor: kPrimaryColor,
         unselectedItemColor: Colors.grey,
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
-        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
-        elevation: 10,
+        elevation: Sizes.elevation_1,
+        iconSize: Sizes.iconSize_20,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
       ),
+      title: '',
     );
   }
 }

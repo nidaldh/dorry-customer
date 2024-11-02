@@ -144,51 +144,69 @@ class _StoreListScreenState extends State<StoreListScreen> {
                                                 ),
                                                 child: Hero(
                                                   tag: 'storeImage-${store.id}',
-                                                  child: Image.network(
-                                                    store.image ??
-                                                        'https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg',
-                                                    height: Sizes.height_120,
-                                                    width: double.infinity,
-                                                    fit: BoxFit.cover,
-                                                    loadingBuilder: (context,
-                                                        child,
-                                                        loadingProgress) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      } else {
-                                                        return Shimmer
-                                                            .fromColors(
-                                                          baseColor: Colors
-                                                              .grey.shade300,
-                                                          highlightColor:
-                                                              Colors.black,
-                                                          child: Container(
+                                                  child: store.image != null
+                                                      ? Image.network(
+                                                          store.image ??
+                                                              'https://static.vecteezy.com/system/resources/previews/010/071/559/non_2x/barbershop-logo-barber-shop-logo-template-vector.jpg',
+                                                          height:
+                                                              Sizes.height_120,
+                                                          width:
+                                                              double.infinity,
+                                                          fit: BoxFit.cover,
+                                                          loadingBuilder: (context,
+                                                              child,
+                                                              loadingProgress) {
+                                                            if (loadingProgress ==
+                                                                null) {
+                                                              return child;
+                                                            } else {
+                                                              return Shimmer
+                                                                  .fromColors(
+                                                                baseColor: Colors
+                                                                    .grey
+                                                                    .shade300,
+                                                                highlightColor:
+                                                                    Colors
+                                                                        .black,
+                                                                child:
+                                                                    Container(
+                                                                  height: Sizes
+                                                                      .height_120,
+                                                                  color: Colors
+                                                                      .grey
+                                                                      .shade200,
+                                                                ),
+                                                              );
+                                                            }
+                                                          },
+                                                          errorBuilder: (context,
+                                                                  error,
+                                                                  stackTrace) =>
+                                                              Container(
                                                             height: Sizes
                                                                 .height_120,
                                                             color: Colors
                                                                 .grey.shade200,
+                                                            child: Center(
+                                                              child: Icon(
+                                                                Icons
+                                                                    .broken_image,
+                                                                size: Sizes
+                                                                    .iconSize_100,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                            ),
                                                           ),
-                                                        );
-                                                      }
-                                                    },
-                                                    errorBuilder: (context,
-                                                            error,
-                                                            stackTrace) =>
-                                                        Container(
-                                                      height: Sizes.height_120,
-                                                      color:
-                                                          Colors.grey.shade200,
-                                                      child: Center(
-                                                        child: Icon(
-                                                          Icons.broken_image,
-                                                          size: Sizes
-                                                              .iconSize_100,
-                                                          color: Colors.grey,
+                                                        )
+                                                      : Image.asset(
+                                                          'assets/image/icon.png',
+                                                          height:
+                                                              Sizes.height_120,
+                                                          width:
+                                                              double.infinity,
+                                                          fit: BoxFit.cover,
                                                         ),
-                                                      ),
-                                                    ),
-                                                  ),
                                                 ),
                                               ),
                                               Padding(
@@ -294,3 +312,5 @@ class _StoreListScreenState extends State<StoreListScreen> {
     );
   }
 }
+
+// DateTime.fromMillisecondsSinceEpoch(1620000000000);

@@ -80,8 +80,7 @@ class ConfirmBookingScreen extends StatelessWidget {
             _buildDetailItem('الزميل', selectedPartner.name),
             _buildDetailItem('التاريخ',
                 '${dayFormatter.format(selectedSlot.date ?? DateTime.now())} - ${dayDateFormatter.format(selectedSlot.date ?? DateTime.now())}'),
-            _buildDetailItem(
-                'الوقت', '${selectedSlot.start}  ${(selectedSlot.end)}'),
+            _buildDetailItem('الوقت', selectedSlot.start),
             _buildDetailItem('المبلغ الإجمالي', '₪${bookingCart.totalAmount}'),
             _buildDetailItem(
                 'المدة الإجمالية', '${bookingCart.totalDuration} دقيقة'),

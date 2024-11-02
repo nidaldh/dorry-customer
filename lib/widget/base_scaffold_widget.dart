@@ -10,6 +10,7 @@ class BaseScaffoldWidget extends StatelessWidget {
   final Widget? floatingActionButton;
   final bool showBackButton;
   final bool showAppBar;
+  final BottomNavigationBar? bottomNavigationBar;
 
   const BaseScaffoldWidget({
     super.key,
@@ -19,6 +20,7 @@ class BaseScaffoldWidget extends StatelessWidget {
     this.floatingActionButton,
     this.showBackButton = true,
     this.showAppBar = true,
+    this.bottomNavigationBar,
   });
 
   @override
@@ -42,6 +44,7 @@ class BaseScaffoldWidget extends StatelessWidget {
           : null,
       body: SafeArea(child: body),
       floatingActionButton: floatingActionButton,
+      bottomNavigationBar: bottomNavigationBar,
     );
   }
 }

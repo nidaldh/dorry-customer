@@ -91,6 +91,7 @@ class Sizes {
   static double get paddingAll_35 => 35.r;
 
   ///Padding symmetric (horizontal =>> .w) (vertical =>> .h)
+  static double get horizontal_5 => 5.w;
   static double get horizontal_16 => 16.w;
   static double get horizontal_25 => 25.w;
   static double get horizontal_45 => 45.w;
@@ -101,6 +102,7 @@ class Sizes {
   static double get vertical_15 => 15.w;
 
   ///size =>> (.r)
+  static double get size_1 => 1.r;
   static double get size_5 => 5.r;
   static double get size_6 => 6.r;
   static double get size_8 => 8.r;

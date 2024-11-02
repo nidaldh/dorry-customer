@@ -2,6 +2,7 @@ import 'package:dorry/app_theme.dart';
 import 'package:dorry/controller/auth_controller.dart';
 import 'package:dorry/model/response/auth/auth_failed_response_model.dart';
 import 'package:dorry/router.dart';
+import 'package:dorry/utils/sizes.dart';
 import 'package:dorry/widget/auth_text_field.dart';
 import 'package:dorry/widget/base_scaffold_widget.dart';
 import 'package:dorry/widget/phone_number_field.dart';
@@ -66,16 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
               children: <Widget>[
                 // App icon with rounded corners and shadow
                 Container(
+                  height: Sizes.height_180,
                   margin: const EdgeInsets.only(bottom: 24),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),

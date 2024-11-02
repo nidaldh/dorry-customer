@@ -1,19 +1,16 @@
-import 'package:dio/dio.dart';
 import 'package:dorry/app_theme.dart';
-import 'package:dorry/const/api_uri.dart';
-import 'package:dorry/model/store/available_slot_blocks.dart';
-import 'package:dorry/router.dart';
-import 'package:dorry/utils/app_snack_bar.dart';
 import 'package:dorry/utils/formatter.dart';
-import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:dorry/model/store/store_user_model.dart';
+import 'package:provider/provider.dart';
+import 'package:dorry/providers/partner_selection_provider.dart';
 import 'package:dorry/model/store/booking_cart.dart';
-import 'package:dorry/utils/api_service.dart';
+import 'package:dorry/utils/user_manager.dart';
+import 'package:dorry/router.dart';
 import 'package:get/get.dart';
 import 'package:dorry/controller/common_controller.dart';
+import 'package:dorry/utils/sizes.dart';
 
-class PartnerSelectionScreen extends StatefulWidget {
+class PartnerSelectionScreen extends StatelessWidget {
   final BookingCartModel bookingCart;
   final dynamic storeId;
 
@@ -24,201 +21,129 @@ class PartnerSelectionScreen extends StatefulWidget {
   });
 
   @override
-  _PartnerSelectionScreenState createState() => _PartnerSelectionScreenState();
-}
-
-class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
-  List<StorePartnerModel>? partners;
-  List<AvailableSlotBlock>? allTimeSlots;
-  List<AvailableSlotBlock>? filteredTimeSlots;
-  bool isLoading = false;
-  StorePartnerModel? selectedPartner;
-  DateTime selectedDate = DateTime.now();
-  String? error;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchPartners();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) =>
+          PartnerSelectionProvider()..fetchPartners(storeId, bookingCart),
+      child: GetBuilder<CommonController>(
+        id: 'partner_selection',
+        builder: (controller) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Row(
+                children: [
+                  const Icon(Icons.group, size: 24),
+                  SizedBox(width: Sizes.size_8),
+                  const Text('اختر الزميل'),
+                ],
+              ),
+              centerTitle: true,
+            ),
+            body: Consumer<PartnerSelectionProvider>(
+              builder: (context, provider, child) {
+                return Stack(
+                  children: [
+                    Column(
+                      children: [
+                        _buildUserList(provider),
+                        if (provider.selectedPartner != null)
+                          _buildDateSelector(provider),
+                        if (provider.selectedPartner != null)
+                          _buildAvailableSlots(provider),
+                      ],
+                    ),
+                    if (provider.isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                  ],
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
   }
 
-  void _fetchPartners() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      Map<String, dynamic> servicesIds = prepareServicesData();
-
-      final response = await ApiService().getRequest(
-        "${ApiUri.store}/${widget.storeId}/available-partners",
-        queryParameters: servicesIds,
-      );
-      setState(() {
-        partners = (response.data['partners'] as List)
-            .map((json) => StorePartnerModel.fromJson(json))
-            .toList();
-        isLoading = false;
-      });
-    } catch (e) {
-      if (e is DioException) {
-        dynamic data = e.response?.data;
-        if (data is Map) {
-          error = data['message'] ?? data['error'] ?? 'خطأ غير معروف';
-        } else {
-          error = 'خطأ غير معروف';
-        }
-        ApiService().handleError(e);
-        return;
-      }
-      errorSnackBar('Failed to load partners: $e');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  void _fetchAvailableTimeSlots() async {
-    if (selectedPartner == null) return;
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      // send services ids
-      Map<dynamic, dynamic> servicesIds = prepareServicesData();
-
-      Map<String, dynamic> data = {
-        'duration': widget.bookingCart.totalDuration,
-        'partner_id': selectedPartner!.id,
-        ...servicesIds,
-      };
-
-      final response = await ApiService().getRequest(
-        ApiUri.availableTimeSlots,
-        queryParameters: data,
-      );
-
-      setState(() {
-        allTimeSlots = (response.data['availableSlotBlocks'] as List)
-            .map((json) => AvailableSlotBlock.fromJson(json))
-            .toList();
-        _filterTimeSlotsByDate(selectedDate);
-        isLoading = false;
-      });
-    } catch (e, s) {
-      if (e is DioException) {
-        ApiService().handleError(e);
-        return;
-      }
-      errorSnackBar('فشل في تحميل الوقت المتاح: $e');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Map<String, dynamic> prepareServicesData() {
-    Map<String, dynamic> servicesIds = {};
-    int i = 0;
-    for (var service in widget.bookingCart.selectedServices) {
-      servicesIds.addAll({"services_ids[$i]": service.id});
-      i++;
-    }
-    return servicesIds;
-  }
-
-  void _filterTimeSlotsByDate(DateTime date) {
-    if (allTimeSlots == null) return;
-
-    setState(() {
-      filteredTimeSlots = allTimeSlots!.where((slotBlock) {
-        return DateTime.parse(slotBlock.date).day == date.day &&
-            DateTime.parse(slotBlock.date).month == date.month &&
-            DateTime.parse(slotBlock.date).year == date.year;
-      }).toList();
-    });
-  }
-
-  Widget _buildUserList() {
-    if (selectedPartner != null) {
+  Widget _buildUserList(PartnerSelectionProvider provider) {
+    if (provider.selectedPartner != null) {
       return Card(
-        elevation: 3,
+        elevation: Sizes.elevation_3,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(Sizes.radius_15),
         ),
-        margin: const EdgeInsets.symmetric(vertical: 8),
+        margin: EdgeInsets.symmetric(vertical: Sizes.vertical_5),
         child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          contentPadding: EdgeInsets.symmetric(
+              vertical: Sizes.vertical_10, horizontal: Sizes.horizontal_16),
           leading: CircleAvatar(
             backgroundColor: kSecondaryColor,
-            child: Text(selectedPartner!.name[0]),
+            child: provider.selectedPartner!.profileImage != null
+                ? Image.network(provider.selectedPartner!.profileImage!)
+                : Text(provider.selectedPartner!.name[0]),
           ),
-          title: Text(selectedPartner!.name,
+          title: Text(provider.selectedPartner!.name,
               style: const TextStyle(fontWeight: FontWeight.bold)),
           trailing: const Icon(Icons.check_circle, color: kSecondaryColor),
           onTap: () {
-            setState(() {
-              selectedPartner = null;
-              filteredTimeSlots = null;
-            });
+            provider.deselectPartner();
           },
         ),
       );
     }
 
-    if (partners == null && isLoading) {
+    if (provider.partners == null && provider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (error != null) {
+    if (provider.error != null) {
       return Center(
         child: Text(
-          error!,
-          style: const TextStyle(fontSize: 16, color: Colors.redAccent),
+          provider.error!,
+          style:
+              TextStyle(fontSize: Sizes.textSize_16, color: Colors.redAccent),
         ),
       );
     }
 
     return GridView.builder(
       shrinkWrap: true,
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      padding: EdgeInsets.all(Sizes.paddingAll_16),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.8,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        crossAxisSpacing: Sizes.size_16,
+        mainAxisSpacing: Sizes.size_16,
       ),
-      itemCount: partners!.length,
+      itemCount: provider.partners!.length,
       itemBuilder: (context, index) {
-        final user = partners![index];
+        final user = provider.partners![index];
         return GestureDetector(
           onTap: () {
-            setState(() {
-              selectedPartner = user;
-            });
-            _fetchAvailableTimeSlots();
+            provider.selectPartner(user);
+            provider.fetchAvailableTimeSlots(bookingCart);
           },
           child: Card(
-            elevation: 5,
+            elevation: Sizes.elevation_1,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(Sizes.radius_15),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircleAvatar(
-                  radius: 30,
+                  radius: Sizes.radius_60,
                   backgroundColor: Colors.grey,
-                  child: Text(user.name[0],
-                      style:
-                          const TextStyle(fontSize: 24, color: Colors.white)),
+                  child: user.profileImage != null
+                      ? Image.network(user.profileImage!)
+                      : Text(
+                          user.name[0],
+                          style: TextStyle(
+                              fontSize: Sizes.textSize_24, color: Colors.white),
+                        ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: Sizes.height_8),
                 Text(user.name,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
@@ -229,17 +154,17 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
     );
   }
 
-  Widget _buildDateSelector() {
+  Widget _buildDateSelector(PartnerSelectionProvider provider) {
     List<Widget> dateWidgets = [];
 
-    allTimeSlots?.forEach((element) {
+    provider.allTimeSlots?.forEach((element) {
       DateTime date = DateTime.parse(element.date);
-      dateWidgets.add(_buildDateItem(date, element.day));
+      dateWidgets.add(_buildDateItem(provider, date, element.day));
     });
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      height: 100,
+      padding: EdgeInsets.symmetric(vertical: Sizes.vertical_10),
+      height: Sizes.height_100,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: dateWidgets,
@@ -247,31 +172,29 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
     );
   }
 
-  Widget _buildDateItem(DateTime date, String day) {
-    bool isSelected = date.day == selectedDate.day &&
-        date.month == selectedDate.month &&
-        date.year == selectedDate.year;
+  Widget _buildDateItem(
+      PartnerSelectionProvider provider, DateTime date, String day) {
+    bool isSelected = date.day == provider.selectedDate.day &&
+        date.month == provider.selectedDate.month &&
+        date.year == provider.selectedDate.year;
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selectedDate = date;
-        });
-        _filterTimeSlotsByDate(date);
+        provider.selectDate(date);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        padding: EdgeInsets.symmetric(horizontal: Sizes.horizontal_5),
         child: Column(
           children: [
             Container(
-              width: 50,
-              height: 50,
+              width: Sizes.width_50,
+              height: Sizes.height_50,
               decoration: BoxDecoration(
                 color: isSelected ? kPrimaryColor : Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected ? kPrimaryColor : Colors.grey,
-                  width: 2,
+                  width: Sizes.size_1,
                 ),
               ),
               alignment: Alignment.center,
@@ -279,12 +202,12 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
                 date.day.toString(),
                 style: TextStyle(
                   color: isSelected ? Colors.white : Colors.black,
-                  fontSize: 18,
+                  fontSize: Sizes.textSize_18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            const SizedBox(height: 5),
+            SizedBox(height: Sizes.height_5),
             Text(
               dayFormatter.format(date),
               style: TextStyle(
@@ -297,49 +220,49 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
     );
   }
 
-  Widget _buildAvailableSlots() {
-    if (isLoading) {
+  Widget _buildAvailableSlots(PartnerSelectionProvider provider) {
+    if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (filteredTimeSlots == null || filteredTimeSlots!.isEmpty) {
-      return const Center(
+    if (provider.filteredTimeSlots == null ||
+        provider.filteredTimeSlots!.isEmpty) {
+      return Center(
         child: Text(
           'لم يتم العثور على وقت متاحة.',
-          style: TextStyle(fontSize: 16, color: Colors.redAccent),
+          style:
+              TextStyle(fontSize: Sizes.textSize_16, color: Colors.redAccent),
         ),
       );
     }
 
     return Expanded(
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        separatorBuilder: (context, index) => Divider(
-          thickness: 1,
-          // color: Colors.purple.shade200,
-        ),
-        itemCount: filteredTimeSlots!.first.slots.length,
+        padding: EdgeInsets.all(Sizes.paddingAll_16),
+        separatorBuilder: (context, index) =>
+            Divider(thickness: Sizes.size_1, color: Colors.grey),
+        itemCount: provider.filteredTimeSlots!.first.slots.length,
         itemBuilder: (context, index) {
-          final slot = filteredTimeSlots!.first.slots[index];
+          final slot = provider.filteredTimeSlots!.first.slots[index];
           return ListTile(
             title: Text('من ${slot.start} إلى ${slot.end}',
-                style: const TextStyle(fontSize: 16)),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+                style: TextStyle(fontSize: Sizes.textSize_16)),
+            trailing: Icon(Icons.arrow_forward_ios, size: Sizes.iconSize_20),
             onTap: () async {
               final customer = CustomerManager.user;
               if (customer == null) {
-                _showLoginDialog(context, slot);
+                _showLoginDialog(context, slot, provider);
                 return;
               }
               router.replace('/confirm-booking', extra: {
-                'selectedPartner': selectedPartner,
+                'selectedPartner': provider.selectedPartner,
                 'selectedSlot': slot,
-                'bookingCart': widget.bookingCart,
+                'bookingCart': bookingCart,
               });
             },
             tileColor: kPrimaryColor.withOpacity(0.3),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Sizes.radius_10),
             ),
           );
         },
@@ -348,9 +271,7 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
   }
 
   void _showLoginDialog(
-    BuildContext context,
-    slot,
-  ) {
+      BuildContext context, slot, PartnerSelectionProvider provider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -365,9 +286,9 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
               Navigator.of(context).pop();
               redirectPath = '/confirm-booking';
               redirectExtra = {
-                'selectedPartner': selectedPartner,
+                'selectedPartner': provider.selectedPartner,
                 'selectedSlot': slot,
-                'bookingCart': widget.bookingCart,
+                'bookingCart': bookingCart,
               };
 
               router.replace('/login');
@@ -376,42 +297,6 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GetBuilder<CommonController>(
-      id: 'partner_selection',
-      builder: (controller) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Row(
-              children: [
-                Icon(Icons.group, size: 24),
-                SizedBox(width: 8),
-                Text('اختر الزميل'),
-              ],
-            ),
-            centerTitle: true,
-          ),
-          body: Stack(
-            children: [
-              Column(
-                children: [
-                  _buildUserList(),
-                  if (selectedPartner != null) _buildDateSelector(),
-                  if (selectedPartner != null) _buildAvailableSlots(),
-                ],
-              ),
-              if (isLoading)
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

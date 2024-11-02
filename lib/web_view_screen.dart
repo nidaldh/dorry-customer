@@ -1,3 +1,4 @@
+import 'package:dorry/widget/base_scaffold_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -29,10 +30,8 @@ class WebViewScreen extends StatelessWidget {
         ),
       )
       ..loadRequest(Uri.parse(url));
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+    return BaseScaffoldWidget(
+      title: title,
       body: WebViewWidget(
         controller: controller,
         // initialUrl: url,

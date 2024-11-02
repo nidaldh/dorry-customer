@@ -1,7 +1,7 @@
 class ApiUri {
-  static const baseUrl = 'https://dorry.khidmatna.com';
-  // static const baseUrl = 'http://192.168.1.12:8000';
-  // static const baseUrl = 'http://192.168.50.206:8000';
+  // static const baseUrl = 'https://dorry.khidmatna.com';
+  // static const baseUrl = 'http://192.168.1.4:8000';
+  static const baseUrl = 'http://192.168.50.206:8000';
 
   static const register = '/api/customer/register';
   static const login = '/api/customer/login';

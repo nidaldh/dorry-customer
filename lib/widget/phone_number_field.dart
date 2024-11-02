@@ -34,8 +34,11 @@ class _CustomPhoneNumberFieldState extends State<CustomPhoneNumberField> {
               color: Color(0xFF44ACAC).withOpacity(0.1)),
           child: Row(
             children: [
-              const Icon(Icons.phone),
-              const SizedBox(width: 12),
+              Image.asset(
+                'assets/image/whatsapp.webp',
+                width: 30,
+                height: 30,
+              ),
               Expanded(
                 child: TextFormField(
                   controller: widget.authController.phoneNumberController,
@@ -50,8 +53,7 @@ class _CustomPhoneNumberFieldState extends State<CustomPhoneNumberField> {
                   textDirection: TextDirection.ltr,
                   decoration: const InputDecoration(
                     fillColor: Colors.transparent,
-                    hintText: 'رقم الهاتف',
-                    border: InputBorder.none,
+                    label: Text('رقم الوتساب'),
                   ),
                 ),
               ),
