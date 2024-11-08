@@ -54,9 +54,10 @@ class AppointmentDetailsScreen extends StatelessWidget {
                     if (appointment.status == 'booked')
                       ElevatedButton(
                         onPressed: () {
-                          provider.showCancelConfirmationDialog(
+                          _showCancelReasonSheet(
                             context,
                             appointmentId,
+                            provider,
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -139,6 +140,18 @@ class AppointmentDetailsScreen extends StatelessWidget {
               value: getStatusText(appointment.status),
               valueColor: getStatusColor(appointment.status),
             ),
+            if(appointment.cancelReason != null )
+              Column(
+                children: [
+                  const Divider(),
+                  _buildDetailRow(
+                    icon: Icons.info,
+                    label: 'سبب الإلغاء',
+                    value: appointment.cancelReason!,
+                    valueColor: Colors.red,
+                  ),
+                ],
+              ),
           ],
         ),
       ),
@@ -212,5 +225,75 @@ class AppointmentDetailsScreen extends StatelessWidget {
     } else {
       return '$duration دقيقة';
     }
+  }
+
+  void _showCancelReasonSheet(
+    BuildContext context,
+    String appointmentId,
+    AppointmentDetailsProvider provider,
+  ) {
+    final TextEditingController _reasonController = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: Sizes.paddingAll_16,
+            right: Sizes.paddingAll_16,
+            top: Sizes.paddingAll_16,
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'سبب الإلغاء',
+                  style: TextStyle(
+                      fontSize: Sizes.textSize_16, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: Sizes.height_16),
+                TextFormField(
+                  controller: _reasonController,
+                  decoration: InputDecoration(
+                    labelText: 'ادخل سبب الإلغاء',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'الرجاء إدخال سبب الإلغاء';
+                    }
+                    if (value.length < 10) {
+                      return 'سبب الإلغاء يجب أن يكون أكثر من 10 حروف';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: Sizes.height_16),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      router.pop();
+                      provider.cancelAppointment(
+                        context,
+                        appointmentId,
+                        _reasonController.text,
+                      );
+                    }
+                  },
+                  child: Text('الغاء الموعد'),
+                ),
+                SizedBox(height: Sizes.height_50),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

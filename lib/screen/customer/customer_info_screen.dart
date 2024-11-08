@@ -161,19 +161,20 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
           SizedBox(height: Sizes.height_20),
           _buildUserInfoCard(context),
           SizedBox(height: Sizes.height_20),
-          ElevatedButton.icon(
-            onPressed: () {
+          ListTile(
+            title: Text('تعديل المعلومات'),
+            leading: Icon(Icons.edit),
+            onTap: () {
               router.push(customerFormPath);
             },
-            icon: Icon(Icons.edit),
-            label: const Text('تعديل المعلومات'),
           ),
-          ElevatedButton.icon(
-            onPressed: () {
+          Divider(),
+          ListTile(
+            title: Text('تواصل معنا'),
+            leading: Icon(Icons.contact_mail),
+            onTap: () {
               router.push(developerInfoPath);
             },
-            icon: Icon(Icons.contact_mail),
-            label: const Text('تواصل معنا'),
           ),
           SizedBox(height: Sizes.height_10),
           if (Platform.isIOS && showDeleteButton)

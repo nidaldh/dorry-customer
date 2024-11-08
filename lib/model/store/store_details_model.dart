@@ -1,4 +1,3 @@
-import 'package:dorry/model/store/store_service_model.dart';
 import 'package:dorry/model/store/store_user_model.dart';
 
 class StoreDetailsModel {

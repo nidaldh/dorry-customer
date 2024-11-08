@@ -8,6 +8,7 @@ class Appointment {
   final String? storeName;
   final dynamic storeId;
   final List<AppointmentService> services;
+  final String? cancelReason;
 
   Appointment({
     required this.id,
@@ -19,6 +20,7 @@ class Appointment {
     required this.services,
     this.storeName,
     this.storeId,
+    this.cancelReason,
   });
 
   factory Appointment.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,7 @@ class Appointment {
       services: (json['services'] as List)
           .map((service) => AppointmentService.fromJson(service))
           .toList(),
+      cancelReason: json['cancel_reason'],
     );
   }
 }

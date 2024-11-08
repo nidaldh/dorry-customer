@@ -1,3 +1,4 @@
+import 'package:dorry/widget/base_scaffold_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -39,11 +40,8 @@ class _DeveloperInfoScreenState extends State<DeveloperInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('معلومات المطور'),
-        centerTitle: true,
-      ),
+    return BaseScaffoldWidget(
+      title: 'الدعم الفني',
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -102,7 +100,7 @@ class _DeveloperInfoScreenState extends State<DeveloperInfoScreen> {
     return Column(
       children: [
         const Text(
-          'للتواصل مع المطور:',
+          ' الدعم الفني :',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),

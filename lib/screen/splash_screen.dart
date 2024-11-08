@@ -23,10 +23,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void checkUser() async {
     try {
-      if (await _checkForUpdate()) {
-        router.replace(needUpdatePath);
-        return;
-      }
+      // if (await _checkForUpdate()) {
+      //   router.replace(needUpdatePath);
+      //   return;
+      // }
       final token = await CustomerManager.getToken();
       if (token != null && await CustomerManager.customerInfo()) {
         await CustomerManager.getUser();
