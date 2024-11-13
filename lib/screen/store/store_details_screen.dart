@@ -63,6 +63,18 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     SliverAppBar(
                       expandedHeight: Sizes.height_200,
                       pinned: true,
+                      actions: [
+                        IconButton(
+                          icon: Icon(
+                            storeProvider.isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                          ),
+                          onPressed: () {
+                            storeProvider.toggleFavorite();
+                          },
+                        ),
+                      ],
                       flexibleSpace: FlexibleSpaceBar(
                         title: Text(
                           storeDetails.name,

@@ -11,6 +11,7 @@ class StoreProvider with ChangeNotifier {
   Map<String, List<StoreServiceModel>> services = {};
   bool isLoading = true;
   final BookingCartModel _bookingCart = BookingCartModel();
+  bool isFavorite = false;
 
   BookingCartModel get bookingCart => _bookingCart;
 
@@ -85,5 +86,10 @@ class StoreProvider with ChangeNotifier {
         'bookingCart': bookingCart,
       },
     );
+  }
+
+  void toggleFavorite() {
+    isFavorite = !isFavorite;
+    notifyListeners();
   }
 }
