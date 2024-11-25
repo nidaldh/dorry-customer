@@ -140,7 +140,7 @@ class AppointmentDetailsScreen extends StatelessWidget {
               value: getStatusText(appointment.status),
               valueColor: getStatusColor(appointment.status),
             ),
-            if(appointment.cancelReason != null )
+            if (appointment.cancelReason != null)
               Column(
                 children: [
                   const Divider(),
@@ -149,6 +149,18 @@ class AppointmentDetailsScreen extends StatelessWidget {
                     label: 'سبب الإلغاء',
                     value: appointment.cancelReason!,
                     valueColor: Colors.red,
+                  ),
+                ],
+              ),
+            if (appointment.note != null)
+              Column(
+                children: [
+                  const Divider(),
+                  _buildDetailRow(
+                    icon: Icons.info,
+                    label: ' ملاحظة',
+                    value: appointment.note!,
+                    valueColor: Colors.green,
                   ),
                 ],
               ),

@@ -106,7 +106,6 @@ class ApiService {
 
       return await _dio.post(path, data: formData);
     } catch (e) {
-      print('Error uploading image: $e');
       throw e;
     }
   }

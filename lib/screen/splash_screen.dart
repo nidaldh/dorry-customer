@@ -1,8 +1,8 @@
 import 'package:dorry/const/api_uri.dart';
 import 'package:dorry/main.dart';
-import 'package:dorry/model/response/auth/success_response_model.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/api_service.dart';
+import 'package:dorry/utils/sizes.dart';
 import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +23,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void checkUser() async {
     try {
-      // if (await _checkForUpdate()) {
-      //   router.replace(needUpdatePath);
-      //   return;
-      // }
+      if (await _checkForUpdate()) {
+        router.replace(needUpdatePath);
+        return;
+      }
       final token = await CustomerManager.getToken();
       if (token != null && await CustomerManager.customerInfo()) {
         await CustomerManager.getUser();
@@ -61,13 +61,13 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Center(
         child: Container(
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.only(bottom: 24),
+          padding: EdgeInsets.all(Sizes.paddingAll_20),
+          margin: EdgeInsets.only(bottom: Sizes.height_25),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Sizes.radius_10),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Sizes.radius_10),
             child: const Image(
               image: AssetImage('assets/image/icon.png'),
             ),

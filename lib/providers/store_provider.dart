@@ -39,6 +39,9 @@ class StoreProvider with ChangeNotifier {
       final response =
           await ApiService().getRequest('${ApiUri.store}/$storeId/services');
       if (response.statusCode == 200) {
+        if (response.data['services'] is Map == false) {
+          return;
+        }
         final data = response.data['services'] as Map<String, dynamic>;
         services = data.map((key, value) {
           return MapEntry(
@@ -88,8 +91,54 @@ class StoreProvider with ChangeNotifier {
     );
   }
 
-  void toggleFavorite() {
-    isFavorite = !isFavorite;
+  void toggleFavorite() async {
+    if (isFavorite) {
+      await removeStoreFromFavorites(storeDetails!.id);
+    } else {
+      await addStoreToFavorites(storeDetails!.id);
+    }
     notifyListeners();
+  }
+
+  Future<void> addStoreToFavorites(storeId) async {
+    try {
+      final response = await ApiService()
+          .postRequest('${ApiUri.baseUrl}/api/customer/favorites/add-store', {
+        'store_id': storeId,
+      });
+
+      if (response.statusCode == 200) {
+        storeDetails!.isFavorite = true;
+      } else {
+        throw Exception('Failed to add store to favorites');
+      }
+    } catch (e, s) {
+      ApiService().logError(e, s);
+      throw Exception('Failed to add store to favorites');
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeStoreFromFavorites(storeId) async {
+    try {
+      final response = await ApiService().postRequest(
+        '${ApiUri.baseUrl}/api/customer/favorites/remove-store',
+        {
+          'store_id': storeId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        storeDetails!.isFavorite = false;
+      } else {
+        throw Exception('Failed to remove store from favorites');
+      }
+    } catch (e, s) {
+      ApiService().logError(e, s);
+      throw Exception('Failed to remove store from favorites');
+    } finally {
+      notifyListeners();
+    }
   }
 }

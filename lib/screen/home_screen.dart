@@ -81,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future _getToken() async {
     final _firebaseMessaging = FirebaseMessaging.instance;
+    String? token;
     if (Platform.isIOS) {
       String? apnsToken = await _firebaseMessaging.getAPNSToken();
       if (apnsToken != null) {
@@ -94,12 +95,13 @@ class _HomeScreenState extends State<HomeScreen> {
         apnsToken = await _firebaseMessaging.getAPNSToken();
         if (apnsToken != null) {
           await _firebaseMessaging.subscribeToTopic('all');
+          token = await FirebaseMessaging.instance.getToken();
         }
       }
     } else {
       await _firebaseMessaging.subscribeToTopic('all');
+      token = await FirebaseMessaging.instance.getToken();
     }
-    String? token = await FirebaseMessaging.instance.getToken();
     if (token != null && CustomerManager.token != null) {
       ApiService().postRequest(ApiUri.fcmToken, {'token': token});
     }

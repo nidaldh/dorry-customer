@@ -15,8 +15,9 @@ class ConfirmBookingScreen extends StatelessWidget {
   final StorePartnerModel selectedPartner;
   final SlotModel selectedSlot;
   final BookingCartModel bookingCart;
+  final TextEditingController _noteController = TextEditingController();
 
-  const ConfirmBookingScreen({
+  ConfirmBookingScreen({
     super.key,
     required this.selectedPartner,
     required this.selectedSlot,
@@ -52,6 +53,8 @@ class ConfirmBookingScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   _buildSelectedServicesList(),
+                  const SizedBox(height: 10),
+                  _buildNoteField(), // Add this line
                 ],
               ),
             ),
@@ -180,6 +183,22 @@ class ConfirmBookingScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildNoteField() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: TextField(
+        controller: _noteController,
+        maxLines: 4,
+        decoration: InputDecoration(
+          labelText: 'ملاحظة',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _confirmBooking(BuildContext context) async {
     showDialog(
       context: context,
@@ -199,10 +218,11 @@ class ConfirmBookingScreen extends StatelessWidget {
           'partner_id': selectedPartner.id,
           'start_timeStamp': selectedSlot.timeStamp,
           'selected_services': selectedServices,
+          'note': _noteController.text,
         },
       );
 
-      Navigator.of(context).pop(); // Close the loading dialog
+      Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
         successSnackBar('تم تأكيد الحجز بنجاح');
@@ -215,7 +235,7 @@ class ConfirmBookingScreen extends StatelessWidget {
       if (e is DioException) {
         ApiService().handleError(e);
       }
-      Navigator.of(context).pop(); // Close the loading dialog
+      Navigator.of(context).pop();
     }
   }
 }

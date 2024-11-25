@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dorry/app_theme.dart';
 import 'package:dorry/controller/common_controller.dart';
 import 'package:dorry/main.dart';
+import 'package:dorry/model/customer_model.dart';
 import 'package:dorry/router.dart';
 import 'package:dorry/utils/sizes.dart';
 import 'package:dorry/web_view_screen.dart';
@@ -44,7 +45,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
               : [],
           showBackButton: false,
           body: Padding(
-            padding: EdgeInsets.all(Sizes.paddingAll_12),
+            padding: EdgeInsets.symmetric(horizontal: Sizes.paddingAll_16),
             child: CustomerManager.user == null
                 ? _buildLoggedOutView(context)
                 : _buildLoggedInView(context),
@@ -80,22 +81,27 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.account_circle, size: 100, color: kPrimaryColor),
+            Icon(Icons.account_circle, size: 120, color: kPrimaryColor),
             SizedBox(height: Sizes.height_20),
             Text(
               'قم بتسجيل الدخول للوصول إلى حسابك',
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: Sizes.height_20),
+            SizedBox(height: Sizes.height_16),
             ElevatedButton(
               onPressed: () {
                 router.push(loginPath);
               },
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Sizes.radius_10),
+                ),
+              ),
               child: const Text('تسجيل الدخول'),
             ),
-            SizedBox(height: Sizes.height_20),
-            TextButton(
+            SizedBox(height: Sizes.height_16),
+            OutlinedButton(
               onPressed: () {
                 router.push(developerInfoPath);
               },
@@ -118,72 +124,18 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           SizedBox(height: Sizes.height_20),
-          if (user.qrCode != null)
-            Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: kPrimaryColor,
-                      width: 2,
-                    ),
-                  ),
-                  child: QrImageView(
-                    data: user.prepareForQrCode(),
-                    version: QrVersions.auto,
-                    size: Sizes.size_200,
-                    semanticsLabel: 'رمز الاستجابة السريعة',
-                    dataModuleStyle: QrDataModuleStyle(
-                      dataModuleShape: QrDataModuleShape.circle,
-                      color: kPrimaryColor,
-                    ),
-                    eyeStyle: QrEyeStyle(
-                      eyeShape: QrEyeShape.circle,
-                      color: kPrimaryColor,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'رمز الاضافة السريعة',
-                      style: TextStyle(
-                        color: kPrimaryColor,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          if (user.qrCode != null) _buildQrCodeView(user),
           SizedBox(height: Sizes.height_20),
           _buildUserInfoCard(context),
           SizedBox(height: Sizes.height_20),
-          ListTile(
-            title: Text('تعديل المعلومات'),
-            leading: Icon(Icons.edit),
-            onTap: () {
-              router.push(customerFormPath);
-            },
-          ),
-          Divider(),
-          ListTile(
-            title: Text('تواصل معنا'),
-            leading: Icon(Icons.contact_mail),
-            onTap: () {
-              router.push(developerInfoPath);
-            },
-          ),
+          actionsSection(),
           SizedBox(height: Sizes.height_10),
           if (Platform.isIOS && showDeleteButton)
             ElevatedButton.icon(
               onPressed: () async {
                 final shouldDelete = await _showDeleteAccountDialog(context);
                 if (shouldDelete == true) {
-                  // Call delete account function here
-                  // For example: await AuthController.deleteAccount();
+                  Get.find<AuthController>().signOut();
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -194,6 +146,52 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
             ),
           SizedBox(height: Sizes.height_20),
           _buildPrivacyAndTermsLinks(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQrCodeView(CustomerModel user) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(Sizes.radius_10),
+        border: Border.all(color: kPrimaryColor, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(Sizes.paddingAll_12),
+      child: Column(
+        children: [
+          QrImageView(
+            data: user.prepareForQrCode(),
+            version: QrVersions.auto,
+            size: Sizes.size_200,
+            semanticsLabel: 'رمز الاستجابة السريعة',
+            dataModuleStyle: QrDataModuleStyle(
+              dataModuleShape: QrDataModuleShape.circle,
+              color: kPrimaryColor,
+            ),
+            eyeStyle: QrEyeStyle(
+              eyeShape: QrEyeShape.circle,
+              color: kPrimaryColor,
+            ),
+          ),
+          SizedBox(height: Sizes.height_8),
+          Text(
+            'رمز الاضافة السريعة',
+            style: TextStyle(
+              color: kPrimaryColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -214,6 +212,43 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text('موافق'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget actionsSection() {
+    return Card(
+      elevation: Sizes.elevation_4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Sizes.radius_10),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(Sizes.paddingAll_16),
+        child: Column(
+          children: [
+            _buildActionRow(Icons.edit, 'تعديل المعلومات', () {}),
+            Divider(),
+            _buildActionRow(Icons.favorite, 'الاماكن المفضلة', () {}),
+            Divider(),
+            _buildActionRow(Icons.contact_mail, 'تواصل معنا', () {}),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionRow(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(icon, color: kPrimaryColor),
+          SizedBox(width: Sizes.width_8),
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -248,7 +283,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
         SizedBox(width: Sizes.width_8),
         Text(
           '$label: $value',
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -293,6 +328,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
         text,
         style: TextStyle(
           color: kPrimaryColor,
+          fontSize: 14,
           decoration: TextDecoration.underline,
         ),
       ),

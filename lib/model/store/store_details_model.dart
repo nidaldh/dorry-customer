@@ -14,6 +14,7 @@ class StoreDetailsModel {
   final String? snapchatLink;
   final String? tiktokLink;
   final String? bio;
+  bool? isFavorite;
 
   StoreDetailsModel({
     required this.id,
@@ -29,6 +30,7 @@ class StoreDetailsModel {
     this.snapchatLink,
     this.tiktokLink,
     this.bio,
+    this.isFavorite,
   });
 
   factory StoreDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,7 @@ class StoreDetailsModel {
       snapchatLink: json['snapchat_link'],
       tiktokLink: json['tiktok_link'],
       bio: json['bio'],
+      isFavorite: json['is_favorite'],
     );
   }
 }

@@ -14,7 +14,6 @@ class BaseResponseModel {
   });
 
   factory BaseResponseModel.fromJson(Map<String, dynamic> json) {
-    print(json['errors']);
     return BaseResponseModel(
       success: json['success'],
       message: json['message'] ?? json['error'],
