@@ -112,7 +112,6 @@ final GoRouter router = GoRouter(
         return const DeveloperInfoScreen();
       },
     ),
-    //needUpdatePath
     GoRoute(
       path: needUpdatePath,
       builder: (context, state) {

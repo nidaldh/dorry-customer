@@ -6,6 +6,7 @@ import 'package:dorry/utils/sizes.dart';
 import 'package:dorry/utils/user_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,26 +25,31 @@ class _SplashScreenState extends State<SplashScreen> {
   void checkUser() async {
     try {
       if (await _checkForUpdate()) {
+        // FlutterNativeSplash.remove();
+        print('updasasd gaslkd,gasidlkjasd');
         router.replace(needUpdatePath);
         return;
       }
       final token = await CustomerManager.getToken();
       if (token != null && await CustomerManager.customerInfo()) {
         await CustomerManager.getUser();
-        router.replace(homePath);
-        return;
+      } else {
+        CustomerManager.clear();
       }
     } catch (e) {
       if (kDebugMode) print(e);
       CustomerManager.clear();
     }
     router.replace(homePath);
+    // FlutterNativeSplash.remove();
   }
 
   Future<bool> _checkForUpdate() async {
     try {
+      print('qdqwdsad');
       final response =
           await ApiService(isAuth: true).getRequest(ApiUri.checkForUpdate);
+      print(response.data);
       if (response.statusCode == 200) {
         final data = response.data;
         showDeleteButton = data['showDeleteButton'] ?? false;
