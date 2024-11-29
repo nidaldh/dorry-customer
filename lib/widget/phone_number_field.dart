@@ -1,4 +1,5 @@
 import 'package:dorry/controller/auth_controller.dart';
+import 'package:dorry/main.dart';
 import 'package:dorry/utils/validators.dart';
 import 'package:flutter/material.dart';
 
@@ -34,11 +35,12 @@ class _CustomPhoneNumberFieldState extends State<CustomPhoneNumberField> {
               color: Color(0xFF44ACAC).withOpacity(0.1)),
           child: Row(
             children: [
-              Image.asset(
-                'assets/image/whatsapp.webp',
-                width: 30,
-                height: 30,
-              ),
+              if (!hideWhatsappIcon)
+                Image.asset(
+                  'assets/image/whatsapp.webp',
+                  width: 30,
+                  height: 30,
+                ),
               Expanded(
                 child: TextFormField(
                   controller: widget.authController.phoneNumberController,
@@ -51,9 +53,11 @@ class _CustomPhoneNumberFieldState extends State<CustomPhoneNumberField> {
                   },
                   validator: Validators.validatePhoneNumber,
                   textDirection: TextDirection.ltr,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     fillColor: Colors.transparent,
-                    label: Text('رقم الوتساب'),
+                    label: Text(
+                      !hideWhatsappIcon ? 'رقم الوتساب' : 'رقم الهاتف',
+                    ),
                   ),
                 ),
               ),

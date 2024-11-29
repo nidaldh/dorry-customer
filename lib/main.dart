@@ -19,6 +19,7 @@ import 'firebase_options.dart';
 BuildContext? appContext;
 late PackageInfo packageInfo;
 bool showDeleteButton = false;
+bool hideWhatsappIcon = false;
 
 void main() async {
   //only portrait mode

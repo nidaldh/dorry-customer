@@ -47,6 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (response.statusCode == 200) {
         final data = response.data;
         showDeleteButton = data['showDeleteButton'] ?? false;
+        hideWhatsappIcon = data['hideWhatsappIcon'] ?? false;
         return data['needsUpdate'] ?? false;
       }
     } catch (e) {
