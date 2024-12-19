@@ -228,11 +228,17 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
         padding: EdgeInsets.all(Sizes.paddingAll_16),
         child: Column(
           children: [
-            _buildActionRow(Icons.edit, 'تعديل المعلومات', () {}),
+            _buildActionRow(Icons.edit, 'تعديل المعلومات', () {
+              router.push(customerFormPath);
+            }),
             Divider(),
-            _buildActionRow(Icons.favorite, 'الاماكن المفضلة', () {}),
+            _buildActionRow(Icons.favorite, 'الاماكن المفضلة', () {
+              router.push(favoriteStoresPath);
+            }),
             Divider(),
-            _buildActionRow(Icons.contact_mail, 'تواصل معنا', () {}),
+            _buildActionRow(Icons.contact_mail, 'تواصل معنا', () {
+              router.push(developerInfoPath);
+            }),
           ],
         ),
       ),

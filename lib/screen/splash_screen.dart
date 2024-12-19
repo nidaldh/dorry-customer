@@ -26,7 +26,6 @@ class _SplashScreenState extends State<SplashScreen> {
     try {
       if (await _checkForUpdate()) {
         // FlutterNativeSplash.remove();
-        print('updasasd gaslkd,gasidlkjasd');
         router.replace(needUpdatePath);
         return;
       }
@@ -46,10 +45,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<bool> _checkForUpdate() async {
     try {
-      print('qdqwdsad');
       final response =
           await ApiService(isAuth: true).getRequest(ApiUri.checkForUpdate);
-      print(response.data);
       if (response.statusCode == 200) {
         final data = response.data;
         showDeleteButton = data['showDeleteButton'] ?? false;
